@@ -8,6 +8,8 @@ import EmptyView from './EmptyView';
 import ColorPicker from './ColorPicker';
 
 import * as d3 from 'd3';
+import * as tiff from 'tiff'
+
 function App() {
 
   //data
@@ -18,6 +20,11 @@ function App() {
   
   const [colorL5, setColorL5] = useState('#c6dbef');
   const [colorL6, setColorL6] = useState('#084594');
+
+  var canvasRefL5 = useRef(null);
+  var canvasRefL6 = useRef(null);
+  var hiddenRef = useRef(null);
+  var dataFetched = false;
 
   //TODO: Edit this to change the extents of the color scale for the linked view
   //saturated color scale used to color the particles
@@ -30,24 +37,70 @@ function App() {
   //otherwise, fix the value to 'x' so the code in LinkedViewD3 doesn't break
   const allowAxisToggle=true;
 
+  function imshow(data, pixelSize, color, canvasRef) {
+    // Flatten 2D input array
+    const flat = [].concat.apply([], data);
+    // Color Scale & Min-Max normalization
+    const [min, max] = d3.extent(flat);
+    const normalize = d => ((d-min)/(max-min));
+    const colorScale = d => color(normalize(d));
+    // Shape of input array
+    const shape = {x: data[0].length, y: data.length};
+  
+    // Set up canvas element
+    const canvas = hiddenRef.current;
+    const context = canvas.getContext("2d");
+    canvas.style.width  = `${shape.x * pixelSize}px`
+    canvas.style.height = `${shape.y * pixelSize}px`;
+    canvas.style.imageRendering = "pixelated";
+  
+    // Draw pixels to the canvas
+    const imageData = context.createImageData(shape.x, shape.y);
+    flat.forEach((d, i) => {
+      let color = isNaN(d) ? {r: 0, g: 0, b: 0} : d3.color(colorScale(d));
+      imageData.data[i*4  ] = color.r;
+      imageData.data[i*4+1] = color.g;
+      imageData.data[i*4+2] = color.b;
+      imageData.data[i*4+3] = 255;
+    });
+    context.putImageData(imageData, 0, 0);
+    var dstContext = canvasRef.current.getContext("2d");
+    dstContext.scale(0.2, 0.2);
+    dstContext.drawImage(canvas, 0, 0);
+  
+    return canvas;
+  }
+
   //here we parse the data as a list of objects
   //with values position ([x,y,z]), velocity ([x,y,z]) and concentration (number)
   async function fetchData(){
-    d3.csv('particledata_058.csv').then(d=>{
-      let newData = [];
-      var i = 0;
-      for(const obj of d){
-        let entry = {}
-        entry.position = [obj.Points0,obj.Points1,obj.Points2].map(dd=>parseFloat(dd));
-        entry.velocity = [obj.velocity0,obj.velocity1,obj.velocity2].map(dd=>parseFloat(dd));
-        entry.concentration = Number(obj.concentration);
-        entry.id = i;
-        newData.push(entry);
-        i+=1;
-      }
-      console.log('particle data',newData)
-      setParticleData(newData);
+    fetch(`L5Cells.TIF`).then((res) =>
+      res.arrayBuffer().then(function (arr) {
+          var tif = tiff.decode(arr);
+          var data = [];
+          for (var i = 0; i < 2048; i++) {
+            data.push([]);
+            for (var j = 2048; j > 0; j--) {
+              data[i].push(tif[0].data[i * 2048 + j - 1]);
+            }
+          }
+          console.log(data);
+          imshow(data, 1, d3.interpolateOranges, canvasRefL5);
+      })
+    )
+    fetch(`L6Cells.TIF`).then((res) =>
+    res.arrayBuffer().then(function (arr) {
+        var tif = tiff.decode(arr);
+        var data = [];
+        for (var i = 0; i < 2048; i++) {
+          data.push([]);
+          for (var j = 2048; j > 0; j--) {
+            data[i].push(tif[0].data[i * 2048 + j - 1]);
+          }
+        }
+        imshow(data, 1, d3.interpolatePurples, canvasRefL6);
     })
+  )
   }
 
   //wrapper for updating the axis we're slicing through for brushing 
@@ -78,7 +131,10 @@ function App() {
 
   //fetch the dta 
   useEffect(()=>{
-    fetchData();
+    if (dataFetched) {
+      fetchData();
+    }
+    dataFetched = true;
   },[]);
 
   //calculate the extents of the datapoints once
@@ -141,7 +197,10 @@ function App() {
       <div style={{'maxHeight': '7vh'}}>
         <h1>{"Visualization of Cortical Cell Expressiveness"}</h1>
       </div>
-      <div 
+      <canvas width={512} height={512} ref={canvasRefL5}/>
+      <canvas width={512} height={512} ref={canvasRefL6}/>
+      <canvas hidden={true} width={2048} height={2048} ref={hiddenRef}/>
+      {/* <div 
         className={'shadow'}
         style={{'height':'20vw','width':'calc(49vw - 10em)','maxHeight':'80vh','display':'inline-block','margin':'3px'}}
       >
@@ -157,8 +216,8 @@ function App() {
         <div style={{'width':'100%','fontSize':'1.5em'}}>
             {'L5 Cell Expression'}
         </div>
-      </div>
-      <div 
+      </div> */}
+      {/* <div 
         className={'shadow'}
         style={{'height':'20vw','width':'calc(48vw - 10em)','maxHeight':'80vh','display':'inline-block','margin':'3px'}}
       >
@@ -174,7 +233,7 @@ function App() {
         <div style={{'width':'100%','fontSize':'1.5em'}}>
             {'L6 Cell Expression'}
         </div>
-      </div>
+      </div> */}
       <div 
         className={'shadow'}
         style={{'height':'20vw','width':'calc(49vw - 10em)','maxHeight':'80vh','display':'inline-block','margin':'3px'}}
