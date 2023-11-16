@@ -11,27 +11,37 @@ import * as tiff from 'tiff'
 import Panzoom from '@panzoom/panzoom'
 
 function App() {
-  const [colorL5, setColorL5] = useState('#c6dbef');
+  const [colorL5, setColorL5] = useState('#F86A02');
   const [colorL6, setColorL6] = useState('#084594');
+  const [colorOverlay, setColorOverlay] = useState('#417505');
+  const [overlayRendered, setOverlayRendered] = useState(false);
 
   // Initial colors for the gradient bars
   const initialColorL5 = d3.interpolateOranges(0.5); // Midpoint of interpolateOranges
   const initialColorL6 = d3.interpolatePurples(0.5); // Midpoint of interpolatePurples
+  const initialColorOverlay = d3.interpolateGreens(0.5); // Midpoint of interpolatePurples
 
   const [gradientColorL5, setGradientColorL5] = useState(initialColorL5);
   const [gradientColorL6, setGradientColorL6] = useState(initialColorL6);
+  const [gradientColorOverlay, setGradientColorOverlay] = useState(initialColorOverlay);
 
   const [showColorPickerL5, setShowColorPickerL5] = useState(false);
   const [showColorPickerL6, setShowColorPickerL6] = useState(false);
+  const [showColorPickerOverlay, setShowColorPickerOverlay] = useState(false);
 
   const toggleColorPickerL5 = () => setShowColorPickerL5(!showColorPickerL5);
   const toggleColorPickerL6 = () => setShowColorPickerL6(!showColorPickerL6);
+  const toggleColorPickerOverlay = () => setShowColorPickerOverlay(!showColorPickerOverlay);
 
   const [sliderPositionL5, setSliderPositionL5] = useState(50); // State for L5 slider position
   const [sliderPositionL6, setSliderPositionL6] = useState(50); // State for L6 slider position
+  const [sliderPositionOverlay, setSliderPositionOverlay] = useState(50); // State for L6 slider position
 
   const [dataL5, setDataL5] = useState();
   const [dataL6, setDataL6] = useState();
+  useEffect(() => {
+      renderOverlay(d3.interpolateRgb("#ffffff", colorL5), d3.interpolateRgb("#ffffff", colorL6), d3.interpolateRgb("#ffffff", colorOverlay));
+  }, [dataL6]);
 
   const [hue, setHue] = useState(0); // The base hue for the color
   const [saturation, setSaturation] = useState(100);
@@ -52,18 +62,43 @@ function App() {
     // Additional logic to convert newPosition to a color for L6, if needed
   };
 
+  const handleSliderChangeOverlay = (newPosition) => {
+    setSliderPositionOverlay(newPosition);
+    // Additional logic to convert newPosition to a color for L6, if needed
+  };
+
   const setColormapL5 = (newColor) => {
     setColorL5(newColor);
     imshow(dataL5, 1, d3.interpolateRgb("#ffffff", newColor), canvasRefL5, 1);
+    renderOverlay(
+      d3.interpolateRgb("#ffffff", newColor), 
+      d3.interpolateRgb("#ffffff", colorL6), 
+      d3.interpolateRgb("#ffffff", colorOverlay)
+    );
   }
 
   const setColormapL6 = (newColor) => {
     setColorL6(newColor);
     imshow(dataL6, 1, d3.interpolateRgb("#ffffff", newColor), canvasRefL6, 1);
+    renderOverlay(
+      d3.interpolateRgb("#ffffff", colorL5), 
+      d3.interpolateRgb("#ffffff", newColor), 
+      d3.interpolateRgb("#ffffff", colorOverlay)
+    );
+  }
+
+  const setColormapOverlay = (newColor) => {
+    setColorOverlay(newColor);
+    renderOverlay(
+      d3.interpolateRgb("#ffffff", colorL5), 
+      d3.interpolateRgb("#ffffff", colorL6), 
+      d3.interpolateRgb("#ffffff", newColor)
+    );
   }
 
   var canvasRefL5 = useRef(null);
   var canvasRefL6 = useRef(null);
+  var canvasRefOverlay = useRef(null);
   var hiddenRef = useRef(null);
   var dataFetched = false;
 
@@ -116,11 +151,9 @@ function App() {
     return canvas;
   }
 
-  //here we parse the data as a list of objects
-  //with values position ([x,y,z]), velocity ([x,y,z]) and concentration (number)
   async function fetchData() {
     fetch(`L5Cells.TIF`).then((res) =>
-      res.arrayBuffer().then(function (arr) {
+      res.arrayBuffer().then(async function (arr) {
         var tif = tiff.decode(arr);
         var data = [];
         for (var i = 0; i < 2048; i++) {
@@ -129,24 +162,24 @@ function App() {
             data[i].push(tif[0].data[i * 2048 + j - 1]);
           }
         }
-        imshow(data, 1, d3.interpolateOranges, canvasRefL5, 0.2);
+        imshow(data, 1, d3.interpolateRgb("#ffffff", colorL5), canvasRefL5, 0.2);
         setDataL5(data);
       })
     )
     fetch(`L6Cells.TIF`).then((res) =>
-      res.arrayBuffer().then(function (arr) {
-        var tif = tiff.decode(arr);
-        var data = [];
-        for (var i = 0; i < 2048; i++) {
-          data.push([]);
-          for (var j = 2048; j > 0; j--) {
-            data[i].push(tif[0].data[i * 2048 + j - 1]);
-          }
-        }
-        imshow(data, 1, d3.interpolatePurples, canvasRefL6, 0.2);
-        setDataL6(data);
-      })
-    )
+          res.arrayBuffer().then(function (arr) {
+            var tif = tiff.decode(arr);
+            var data = [];
+            for (var i = 0; i < 2048; i++) {
+              data.push([]);
+              for (var j = 2048; j > 0; j--) {
+                data[i].push(tif[0].data[i * 2048 + j - 1]);
+              }
+            }
+            imshow(data, 1, d3.interpolateRgb("#ffffff", colorL6), canvasRefL6, 0.2);
+            setDataL6(data);
+          })
+        )
   }
 
   useEffect(() => {
@@ -155,6 +188,74 @@ function App() {
     }
     dataFetched = true;
   }, []);
+
+  function renderOverlay(colorL5, colorL6, colorOverlay) {
+    if (dataL5 && dataL6) {
+      let scale = 0.2;
+      if (overlayRendered) {
+        scale = 1.0;
+      }
+      const flatL5 = [].concat.apply([], dataL5);
+      const flatL6 = [].concat.apply([], dataL6);
+
+      // Color Scale & Min-Max normalization
+      const [minL5, maxL5] = d3.extent(flatL5);
+      const normalizeL5 = d => ((d - minL5) / (maxL5 - minL5));
+      const colorScaleL5 = d => colorL5(normalizeL5(d));
+      const [minL6, maxL6] = d3.extent(flatL6);
+      const normalizeL6 = d => ((d - minL6) / (maxL6 - minL6));
+      const colorScaleL6 = d => colorL6(normalizeL6(d));
+      // Shape of input array
+      const shape = { x: dataL5[0].length, y: dataL5.length };
+
+      // Set up canvas element
+      const canvas = hiddenRef.current;
+      const context = canvas.getContext("2d");
+      canvas.style.width = `${shape.x}px`
+      canvas.style.height = `${shape.y}px`;
+      canvas.style.imageRendering = "pixelated";
+
+      // Draw pixels to the canvas
+      const imageData = context.createImageData(shape.x, shape.y);
+      flatL5.forEach((d, i) => {
+        let color = { r: 255, g: 255, b: 255 };
+        if (normalizeL5(d) > 0.15) {
+          if (normalizeL6(flatL6[i]) > 0.15) {
+            color = d3.color(colorOverlay((normalizeL5(d) + normalizeL6(flatL6[i])) / 2));
+          } else {
+            color = d3.color(colorScaleL5(d));
+          }
+        } else if (normalizeL6(flatL6[i]) > 0.15) {
+          color = d3.color(colorScaleL6(flatL6[i]));
+        }
+        imageData.data[i * 4] = color.r;
+        imageData.data[i * 4 + 1] = color.g;
+        imageData.data[i * 4 + 2] = color.b;
+        imageData.data[i * 4 + 3] = 255;
+      });
+      context.putImageData(imageData, 0, 0);
+      var dstContext = canvasRefOverlay.current.getContext("2d");
+      console.log(scale);
+      dstContext.scale(scale, scale);
+      dstContext.drawImage(canvas, 0, 0);
+
+        // FIXME: use the imported Panzoom to pan and zoom on the L5 and L6 canvases
+      var canvasL = canvasRefOverlay.current 
+      const panZoomL = Panzoom(canvasL, {
+        maxScale: 5,
+        zoomSpeed: 1,
+        minScale: 1
+      })
+      panZoomL.pan(10, 10)
+      panZoomL.zoom(2, {
+        animate: true
+      })
+
+      // FIXME: use event listener; when user scrolls with mousewheel, zoom
+      canvasL.addEventListener('wheel', panZoomL.zoomWithWheel)
+      setOverlayRendered(true);
+    }
+  }
 
   return (
     <div
@@ -170,6 +271,9 @@ function App() {
         </div>
         <div>
           <canvas width={512} height={512} ref={canvasRefL6}/>
+        </div>
+        <div>
+          <canvas width={512} height={512} ref={canvasRefOverlay}/>
         </div>
         <canvas hidden={true} width={2048} height={2048} ref={hiddenRef}/>
       </div>
@@ -222,6 +326,29 @@ function App() {
                 <ColorPicker
                   initialColor={gradientColorL6}
                   onColorChange={setColormapL6}
+                />
+              )}
+            </div>
+            <div>
+              <h3>Overlap Color</h3>
+
+              <GradientBar
+                color={gradientColorOverlay}
+                sliderPosition={sliderPositionOverlay}
+                onSliderChange={handleSliderChangeOverlay}
+              />
+
+              <img
+                src="color-picker.png"
+                alt="Color Picker"
+                style={{ height: '25px' }}
+                onClick={toggleColorPickerOverlay}
+              />
+
+              {showColorPickerOverlay && (
+                <ColorPicker
+                  initialColor={gradientColorOverlay}
+                  onColorChange={setColormapOverlay}
                 />
               )}
             </div>
