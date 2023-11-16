@@ -324,6 +324,7 @@ function App() {
       <div className="header-container" >
         <h1>{"Visualization of Cortical Cell Expressiveness"}</h1>
       </div>
+      <div>{"Click and Drag to Pan, Scroll to Zoom"}</div>
       <div style={{ 'display': 'flex', 'flex-direction': 'row', 'justify-content': 'center' }}>
         <div>
           <canvas width={512} height={512} ref={canvasRefL5} />
@@ -360,6 +361,7 @@ function App() {
                   style={{ height: '25px' }}
                   onClick={toggleColorPickerL5}
                 />
+                <label>Click to Open/Close</label>
 
                 {showColorPickerL5 && (
                   <ColorPicker
@@ -384,6 +386,7 @@ function App() {
                   style={{ height: '25px' }}
                   onClick={toggleColorPickerL6}
                 />
+                <label>Click to Open/Close</label>
 
                 {showColorPickerL6 && (
                   <ColorPicker
@@ -407,6 +410,7 @@ function App() {
                   style={{ height: '25px' }}
                   onClick={toggleColorPickerOverlay}
                 />
+                <label>Click to Open/Close</label>
 
                 {showColorPickerOverlay && (
                   <ColorPicker
