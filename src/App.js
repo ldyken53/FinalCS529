@@ -38,6 +38,9 @@ function App() {
   const [sliderPositionL5, setSliderPositionL5] = useState(50); // State for L5 slider position
   const [sliderPositionL6, setSliderPositionL6] = useState(50); // State for L6 slider position
 
+  const [dataL5, setDataL5] = useState();
+  const [dataL6, setDataL6] = useState();
+
   const [hue, setHue] = useState(0); // The base hue for the color
   const [saturation, setSaturation] = useState(100);
 
@@ -57,6 +60,16 @@ function App() {
     // Additional logic to convert newPosition to a color for L6, if needed
   };
 
+  const setColormapL5 = (newColor) => {
+    setColorL5(newColor);
+    imshow(dataL5, 1, d3.interpolateRgb("#ffffff", newColor), canvasRefL5, 1);
+  }
+
+  const setColormapL6 = (newColor) => {
+    setColorL6(newColor);
+    imshow(dataL6, 1, d3.interpolateRgb("#ffffff", newColor), canvasRefL6, 1);
+  }
+
   var canvasRefL5 = useRef(null);
   var canvasRefL6 = useRef(null);
   var hiddenRef = useRef(null);
@@ -73,7 +86,7 @@ function App() {
   //otherwise, fix the value to 'x' so the code in LinkedViewD3 doesn't break
   const allowAxisToggle = true;
 
-  function imshow(data, pixelSize, color, canvasRef) {
+  function imshow(data, pixelSize, color, canvasRef, scale) {
     // Flatten 2D input array
     const flat = [].concat.apply([], data);
     // Color Scale & Min-Max normalization
@@ -101,7 +114,7 @@ function App() {
     });
     context.putImageData(imageData, 0, 0);
     var dstContext = canvasRef.current.getContext("2d");
-    dstContext.scale(0.2, 0.2);
+    dstContext.scale(scale, scale);
     dstContext.drawImage(canvas, 0, 0);
 
     return canvas;
@@ -120,8 +133,8 @@ function App() {
             data[i].push(tif[0].data[i * 2048 + j - 1]);
           }
         }
-        console.log(data);
-        imshow(data, 1, d3.interpolateOranges, canvasRefL5);
+        imshow(data, 1, d3.interpolateOranges, canvasRefL5, 0.2);
+        setDataL5(data);
       })
     )
     fetch(`L6Cells.TIF`).then((res) =>
@@ -134,7 +147,8 @@ function App() {
             data[i].push(tif[0].data[i * 2048 + j - 1]);
           }
         }
-        imshow(data, 1, d3.interpolatePurples, canvasRefL6);
+        imshow(data, 1, d3.interpolatePurples, canvasRefL6, 0.2);
+        setDataL6(data);
       })
     )
   }
@@ -167,7 +181,7 @@ function App() {
 
   //fetch the dta 
   useEffect(() => {
-    if (dataFetched) {
+    if (!dataFetched) {
       fetchData();
     }
     dataFetched = true;
@@ -311,7 +325,7 @@ function App() {
               {showColorPickerL5 && (
                 <ColorPicker
                   initialColor={gradientColorL5}
-                  onColorChange={setGradientColorL5}
+                  onColorChange={setColormapL5}
                 />
               )}
             </div>
@@ -335,7 +349,7 @@ function App() {
               {showColorPickerL6 && (
                 <ColorPicker
                   initialColor={gradientColorL6}
-                  onColorChange={setGradientColorL6}
+                  onColorChange={setColormapL6}
                 />
               )}
             </div>
