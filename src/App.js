@@ -340,9 +340,9 @@ function App() {
         style={{ 'height': '50vw', 'width': '20em', 'maxHeight': '80vh', 'display': 'inline-block', 'marginTop': '0px' }}
       >
         <div style={{ 'width': '100%', 'height': 'calc(100% - 9em)' }}>
-          <div style={{ 'width': '100%', 'height': '1.5em', 'fontSize': '1.5em' }}>
+          <div style={{ 'width': '100%', 'height': '1.5em', 'fontSize': '1.5em', display: 'flex', flexDirection: 'row'  }}>
             {'Color Map for Values'}
-            <div>
+            <div style={{"flex": '1', width: '30%'}}>
               <h3>L5 Cell Color</h3>
               <GradientBar
                 color={gradientColorL5}
@@ -365,7 +365,7 @@ function App() {
               )}
             </div>
 
-            <div>
+            <div style={{"flex": '1', width: '30%'}}>
               <h3>L6 Cell Color</h3>
 
               <GradientBar
@@ -388,7 +388,7 @@ function App() {
                 />
               )}
             </div>
-            <div>
+            <div style={{"flex": '1', width: '30%'}}>
               <h3>Overlap Color</h3>
 
               <GradientBar
