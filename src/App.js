@@ -132,21 +132,6 @@ function App() {
     var dstContext = canvasRef.current.getContext("2d");
     dstContext.scale(scale, scale);
     dstContext.drawImage(canvas, 0, 0);
-
-      // FIXME: use the imported Panzoom to pan and zoom on the L5 and L6 canvases
-    var canvasL = canvasRef.current
-    const panZoomL = Panzoom(canvasL, {
-      maxScale: 5,
-      zoomSpeed: 1,
-      minScale: 1
-    })
-    panZoomL.pan(10, 10)
-    panZoomL.zoom(2, {
-      animate: true
-    })
-
-    // FIXME: use event listener; when user scrolls with mousewheel, zoom
-    canvasL.addEventListener('wheel', panZoomL.zoomWithWheel)
   
     return canvas;
   }
@@ -183,11 +168,99 @@ function App() {
   }
 
   useEffect(() => {
+    setControls();
     if (!dataFetched) {
       fetchData();
     }
     dataFetched = true;
   }, []);
+
+  function setControls() {
+    const panZoomL5 = Panzoom(canvasRefL5.current, {
+      maxScale: 5,
+      zoomSpeed: 1,
+      minScale: 1,
+      noBind: true,
+      step: 0.1
+    });
+    panZoomL5.pan(10, 10)
+    panZoomL5.zoom(2, {
+      animate: true
+    });
+    const panZoomL6 = Panzoom(canvasRefL6.current, {
+      maxScale: 5,
+      zoomSpeed: 1,
+      minScale: 1,
+      noBind: true,
+      step: 0.1
+    });
+    panZoomL6.pan(10, 10)
+    panZoomL6.zoom(2, {
+      animate: true
+    });
+    const panZoomOverlay = Panzoom(canvasRefOverlay.current, {
+      maxScale: 5,
+      zoomSpeed: 1,
+      minScale: 1,
+      noBind: true,
+      step: 0.1
+    });     
+    panZoomOverlay.pan(10, 10);
+    panZoomOverlay.zoom(2, {
+      animate: true
+    });
+
+    canvasRefL5.current.addEventListener('pointerdown', panZoomL5.handleDown)
+    canvasRefL5.current.addEventListener('pointerdown', panZoomL6.handleDown)
+    canvasRefL5.current.addEventListener('pointerdown', panZoomOverlay.handleDown)
+    canvasRefL6.current.addEventListener('pointerdown', panZoomL5.handleDown)
+    canvasRefL6.current.addEventListener('pointerdown', panZoomL6.handleDown)
+    canvasRefL6.current.addEventListener('pointerdown', panZoomOverlay.handleDown)
+    canvasRefOverlay.current.addEventListener('pointerdown', panZoomL5.handleDown)
+    canvasRefOverlay.current.addEventListener('pointerdown', panZoomL6.handleDown)
+    canvasRefOverlay.current.addEventListener('pointerdown', panZoomOverlay.handleDown)
+    document.addEventListener('pointermove', panZoomL5.handleMove)
+    document.addEventListener('pointerup', panZoomL5.handleUp)
+    document.addEventListener('pointermove', panZoomL6.handleMove)
+    document.addEventListener('pointerup', panZoomL6.handleUp)
+    document.addEventListener('pointermove', panZoomOverlay.handleMove)
+    document.addEventListener('pointerup', panZoomOverlay.handleUp)
+
+    // FIXME: use event listener; when user scrolls with mousewheel, zoom
+    canvasRefL5.current.addEventListener('wheel', (event) => {
+      if (event.deltaY > 0) {
+        panZoomL5.zoomIn({animate: false});
+        panZoomL6.zoomIn({animate: false});
+        panZoomOverlay.zoomIn({animate: false});
+      } else {
+        panZoomL5.zoomOut({animate: false});
+        panZoomL6.zoomOut({animate: false});
+        panZoomOverlay.zoomOut({animate: false});
+      }
+    });
+    canvasRefL6.current.addEventListener('wheel', (event) => {
+      if (event.deltaY > 0) {
+        panZoomL5.zoomIn({animate: false});
+        panZoomL6.zoomIn({animate: false});
+        panZoomOverlay.zoomIn({animate: false});
+      } else {
+        panZoomL5.zoomOut({animate: false});
+        panZoomL6.zoomOut({animate: false});
+        panZoomOverlay.zoomOut({animate: false});
+      }
+    });
+    canvasRefOverlay.current.addEventListener('wheel', (event) => {
+      if (event.deltaY > 0) {
+        panZoomL5.zoomIn({animate: false});
+        panZoomL6.zoomIn({animate: false});
+        panZoomOverlay.zoomIn({animate: false});
+      } else {
+        panZoomL5.zoomOut({animate: false});
+        panZoomL6.zoomOut({animate: false});
+        panZoomOverlay.zoomOut({animate: false});
+      }
+    });
+  }
 
   function renderOverlay(colorL5, colorL6, colorOverlay) {
     if (dataL5 && dataL6) {
@@ -239,20 +312,6 @@ function App() {
       dstContext.scale(scale, scale);
       dstContext.drawImage(canvas, 0, 0);
 
-        // FIXME: use the imported Panzoom to pan and zoom on the L5 and L6 canvases
-      var canvasL = canvasRefOverlay.current 
-      const panZoomL = Panzoom(canvasL, {
-        maxScale: 5,
-        zoomSpeed: 1,
-        minScale: 1
-      })
-      panZoomL.pan(10, 10)
-      panZoomL.zoom(2, {
-        animate: true
-      })
-
-      // FIXME: use event listener; when user scrolls with mousewheel, zoom
-      canvasL.addEventListener('wheel', panZoomL.zoomWithWheel)
       setOverlayRendered(true);
     }
   }
