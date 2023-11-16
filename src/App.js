@@ -7,7 +7,6 @@ import ColorLegend from './ColorLegend';
 import EmptyView from './EmptyView';
 import ColorPicker from './ColorPicker';
 import GradientBar from './GradientBar';
-import { SliderColorProvider, useSliderColor } from './SliderColorContext';
 
 import * as d3 from 'd3';
 import * as tiff from 'tiff'
@@ -42,8 +41,6 @@ function App() {
   const [hue, setHue] = useState(0); // The base hue for the color
   const [saturation, setSaturation] = useState(100);
 
-  const { sliderColorL5, sliderColorL6 } = useSliderColor();
-
   const handleSaturationChange = (newSaturation) => {
     setSaturation(newSaturation);
   };
@@ -60,7 +57,6 @@ function App() {
     // Additional logic to convert newPosition to a color for L6, if needed
   };
 
-  
   var canvasRefL5 = useRef(null);
   var canvasRefL6 = useRef(null);
   var hiddenRef = useRef(null);
@@ -111,10 +107,6 @@ function App() {
     return canvas;
   }
 
-  // useEffect(() => {
-  //   fetchData();
-  // }, [sliderPositionL5, sliderPositionL6]);
-
   //here we parse the data as a list of objects
   //with values position ([x,y,z]), velocity ([x,y,z]) and concentration (number)
   async function fetchData() {
@@ -128,12 +120,8 @@ function App() {
             data[i].push(tif[0].data[i * 2048 + j - 1]);
           }
         }
-        //console.log(data);
-        imshow(data, 1, d3.interpolateRgb('#FFFFFF', gradientColorL5), canvasRefL5);
-        // if(sliderColorL5)
-        // {
-        //   imshow(data, 1, d3.interpolateRgb('#FFFFFF', sliderColorL5), canvasRefL5);
-        // }
+        console.log(data);
+        imshow(data, 1, d3.interpolateOranges, canvasRefL5);
       })
     )
     fetch(`L6Cells.TIF`).then((res) =>
@@ -146,17 +134,9 @@ function App() {
             data[i].push(tif[0].data[i * 2048 + j - 1]);
           }
         }
-        imshow(data, 1, d3.interpolateRgb('#FFFFFF', gradientColorL6), canvasRefL6);
-        // if(sliderColorL5)
-        // {
-        //   imshow(data, 1, d3.interpolateRgb('#FFFFFF', sliderColorL6), canvasRefL5);
-        // }
+        imshow(data, 1, d3.interpolatePurples, canvasRefL6);
       })
     )
-    // if (sliderColorL5 && sliderColorL6) {
-    //   imshow(data, 1, d3.interpolateRgb('#FFFFFF', sliderColorL5), canvasRefL5);
-    //   imshow(data, 1, d3.interpolateRgb('#FFFFFF', sliderColorL6), canvasRefL6);
-    // }
   }
 
   //wrapper for updating the axis we're slicing through for brushing 
@@ -173,7 +153,7 @@ function App() {
     let newY = brushedCoord + brushedAreaThickness * scale;
     setbrushedCoord(newY);
   }
-  
+
   //event handler for key presses (up/down for incrementing brush event)
   function handleKeyPress(e) {
     console.log('e', e)
@@ -245,7 +225,6 @@ function App() {
 
   //tabIndex is needed to put the keypress event on the div
   return (
-    <SliderColorProvider>
     <div
       onKeyUp={handleKeyPress}
       tabIndex={0}
@@ -320,7 +299,6 @@ function App() {
                 color={gradientColorL5}
                 sliderPosition={sliderPositionL5}
                 onSliderChange={handleSliderChangeL5}
-                barType="L5"
               />
 
               <img
@@ -345,7 +323,6 @@ function App() {
                 color={gradientColorL6}
                 sliderPosition={sliderPositionL6}
                 onSliderChange={handleSliderChangeL6}
-                barType="L6"
               />
 
               <img
@@ -369,7 +346,6 @@ function App() {
         </div>
       </div>
     </div>
-    </SliderColorProvider>
   );
 }
 

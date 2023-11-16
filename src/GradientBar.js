@@ -1,16 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import * as d3 from 'd3';
-import { useSliderColor } from './SliderColorContext';
 
-const GradientBar = ({ color, onSliderChange, sliderPosition, barType }) => {
-    const { updateSliderColorL5, updateSliderColorL6 } = useSliderColor();
+const GradientBar = ({ color, onSliderChange, sliderPosition }) => {
     const [isDragging, setIsDragging] = useState(false);
     const [sliderColor, setSliderColor] = useState(color);
-    useEffect(() => {
-        const interpolateColor = d3.interpolateRgb("#ffffff", color);
-        const newSliderColor = interpolateColor(sliderPosition / 100);
-        setSliderColor(newSliderColor);
-    }, [color, sliderPosition]);
+
     const gradientStyle = {
         background: `linear-gradient(to right, #ffffff, ${color})`,
         height: '20px',
@@ -38,15 +32,8 @@ const GradientBar = ({ color, onSliderChange, sliderPosition, barType }) => {
     useEffect(() => {
         const interpolateColor = d3.interpolateRgb("#ffffff", color);
         const newSliderColor = interpolateColor(sliderPosition / 100);
-        //console.log('New slider color:', sliderColor);
-        console.log(`New Slider Color for ${barType}:`, newSliderColor);
-        if (barType === 'L5') {
-            updateSliderColorL5(newSliderColor);
-        } else if (barType === 'L6') {
-            updateSliderColorL6(newSliderColor);
-        }
-    }, [color, sliderPosition, barType, updateSliderColorL5, updateSliderColorL6]);
-
+        setSliderColor(newSliderColor);
+    }, [color, sliderPosition]);
 
     let barRect = null
     const handleMouseDown = (event) => {
@@ -60,7 +47,7 @@ const GradientBar = ({ color, onSliderChange, sliderPosition, barType }) => {
     const handleMouseMove = (event) => {
         if (isDragging) {
             barRect = document.getElementById('colorBar').getBoundingClientRect()
-            //console.log(event.target)
+            console.log(event.target)
             let newSliderPosition = ((event.clientX - barRect.left) / barRect.width) * 100;
             //console.log("Mouse Position: ", event.clientX, newSliderPosition, barRect.left, barRect.width)
             newSliderPosition = Math.max(0, Math.min(newSliderPosition, 100)); // Clamp between 0 and 100
