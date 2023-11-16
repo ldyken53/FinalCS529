@@ -74,7 +74,9 @@ function App() {
       // FIXME: use the imported Panzoom to pan and zoom on the L5 and L6 canvases
     var canvasL = canvasRef.current
       const panZoomL = Panzoom(canvasL, {
-      maxScale: 5
+      maxScale: 5,
+      zoomSpeed: 1,
+      minScale: 1
     })
     panZoomL.pan(10, 10)
     panZoomL.zoom(2, {
