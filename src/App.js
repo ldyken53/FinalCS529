@@ -18,7 +18,7 @@ function App() {
 
   // Initial colors for the gradient bars
   const initialColorL5 = d3.interpolateOranges(0.5); // Midpoint of interpolateOranges
-  const initialColorL6 = d3.interpolatePurples(0.5); // Midpoint of interpolatePurples
+  const initialColorL6 = d3.interpolateBlues(0.5); // Midpoint of interpolatePurples
   const initialColorOverlay = d3.interpolateGreens(0.5); // Midpoint of interpolatePurples
 
   const [gradientColorL5, setGradientColorL5] = useState(initialColorL5);
@@ -40,7 +40,7 @@ function App() {
   const [dataL5, setDataL5] = useState();
   const [dataL6, setDataL6] = useState();
   useEffect(() => {
-      renderOverlay(d3.interpolateRgb("#ffffff", colorL5), d3.interpolateRgb("#ffffff", colorL6), d3.interpolateRgb("#ffffff", colorOverlay));
+    renderOverlay(d3.interpolateRgb("#ffffff", colorL5), d3.interpolateRgb("#ffffff", colorL6), d3.interpolateRgb("#ffffff", colorOverlay));
   }, [dataL6]);
 
   const [hue, setHue] = useState(0); // The base hue for the color
@@ -71,8 +71,8 @@ function App() {
     setColorL5(newColor);
     imshow(dataL5, 1, d3.interpolateRgb("#ffffff", newColor), canvasRefL5, 1);
     renderOverlay(
-      d3.interpolateRgb("#ffffff", newColor), 
-      d3.interpolateRgb("#ffffff", colorL6), 
+      d3.interpolateRgb("#ffffff", newColor),
+      d3.interpolateRgb("#ffffff", colorL6),
       d3.interpolateRgb("#ffffff", colorOverlay)
     );
   }
@@ -81,8 +81,8 @@ function App() {
     setColorL6(newColor);
     imshow(dataL6, 1, d3.interpolateRgb("#ffffff", newColor), canvasRefL6, 1);
     renderOverlay(
-      d3.interpolateRgb("#ffffff", colorL5), 
-      d3.interpolateRgb("#ffffff", newColor), 
+      d3.interpolateRgb("#ffffff", colorL5),
+      d3.interpolateRgb("#ffffff", newColor),
       d3.interpolateRgb("#ffffff", colorOverlay)
     );
   }
@@ -90,8 +90,8 @@ function App() {
   const setColormapOverlay = (newColor) => {
     setColorOverlay(newColor);
     renderOverlay(
-      d3.interpolateRgb("#ffffff", colorL5), 
-      d3.interpolateRgb("#ffffff", colorL6), 
+      d3.interpolateRgb("#ffffff", colorL5),
+      d3.interpolateRgb("#ffffff", colorL6),
       d3.interpolateRgb("#ffffff", newColor)
     );
   }
@@ -132,7 +132,7 @@ function App() {
     var dstContext = canvasRef.current.getContext("2d");
     dstContext.scale(scale, scale);
     dstContext.drawImage(canvas, 0, 0);
-  
+
     return canvas;
   }
 
@@ -152,19 +152,19 @@ function App() {
       })
     )
     fetch(`L6Cells.TIF`).then((res) =>
-          res.arrayBuffer().then(function (arr) {
-            var tif = tiff.decode(arr);
-            var data = [];
-            for (var i = 0; i < 2048; i++) {
-              data.push([]);
-              for (var j = 2048; j > 0; j--) {
-                data[i].push(tif[0].data[i * 2048 + j - 1]);
-              }
-            }
-            imshow(data, 1, d3.interpolateRgb("#ffffff", colorL6), canvasRefL6, 0.2);
-            setDataL6(data);
-          })
-        )
+      res.arrayBuffer().then(function (arr) {
+        var tif = tiff.decode(arr);
+        var data = [];
+        for (var i = 0; i < 2048; i++) {
+          data.push([]);
+          for (var j = 2048; j > 0; j--) {
+            data[i].push(tif[0].data[i * 2048 + j - 1]);
+          }
+        }
+        imshow(data, 1, d3.interpolateRgb("#ffffff", colorL6), canvasRefL6, 0.2);
+        setDataL6(data);
+      })
+    )
   }
 
   useEffect(() => {
@@ -204,7 +204,7 @@ function App() {
       minScale: 1,
       noBind: true,
       step: 0.1
-    });     
+    });
     panZoomOverlay.pan(10, 10);
     panZoomOverlay.zoom(2, {
       animate: true
@@ -229,35 +229,35 @@ function App() {
     // FIXME: use event listener; when user scrolls with mousewheel, zoom
     canvasRefL5.current.addEventListener('wheel', (event) => {
       if (event.deltaY > 0) {
-        panZoomL5.zoomIn({animate: false});
-        panZoomL6.zoomIn({animate: false});
-        panZoomOverlay.zoomIn({animate: false});
+        panZoomL5.zoomIn({ animate: false });
+        panZoomL6.zoomIn({ animate: false });
+        panZoomOverlay.zoomIn({ animate: false });
       } else {
-        panZoomL5.zoomOut({animate: false});
-        panZoomL6.zoomOut({animate: false});
-        panZoomOverlay.zoomOut({animate: false});
+        panZoomL5.zoomOut({ animate: false });
+        panZoomL6.zoomOut({ animate: false });
+        panZoomOverlay.zoomOut({ animate: false });
       }
     });
     canvasRefL6.current.addEventListener('wheel', (event) => {
       if (event.deltaY > 0) {
-        panZoomL5.zoomIn({animate: false});
-        panZoomL6.zoomIn({animate: false});
-        panZoomOverlay.zoomIn({animate: false});
+        panZoomL5.zoomIn({ animate: false });
+        panZoomL6.zoomIn({ animate: false });
+        panZoomOverlay.zoomIn({ animate: false });
       } else {
-        panZoomL5.zoomOut({animate: false});
-        panZoomL6.zoomOut({animate: false});
-        panZoomOverlay.zoomOut({animate: false});
+        panZoomL5.zoomOut({ animate: false });
+        panZoomL6.zoomOut({ animate: false });
+        panZoomOverlay.zoomOut({ animate: false });
       }
     });
     canvasRefOverlay.current.addEventListener('wheel', (event) => {
       if (event.deltaY > 0) {
-        panZoomL5.zoomIn({animate: false});
-        panZoomL6.zoomIn({animate: false});
-        panZoomOverlay.zoomIn({animate: false});
+        panZoomL5.zoomIn({ animate: false });
+        panZoomL6.zoomIn({ animate: false });
+        panZoomOverlay.zoomIn({ animate: false });
       } else {
-        panZoomL5.zoomOut({animate: false});
-        panZoomL6.zoomOut({animate: false});
-        panZoomOverlay.zoomOut({animate: false});
+        panZoomL5.zoomOut({ animate: false });
+        panZoomL6.zoomOut({ animate: false });
+        panZoomOverlay.zoomOut({ animate: false });
       }
     });
   }
@@ -321,98 +321,102 @@ function App() {
       tabIndex={0}
       className="App" style={{ 'height': '100vh', 'width': '100vw' }}
     >
-      <div style={{ 'maxHeight': '7vh' }}>
+      <div className="header-container" >
         <h1>{"Visualization of Cortical Cell Expressiveness"}</h1>
       </div>
-      <div style={{'display': 'flex', 'flex-direction': 'row', 'justify-content': 'center'}}>
+      <div style={{ 'display': 'flex', 'flex-direction': 'row', 'justify-content': 'center' }}>
         <div>
-          <canvas width={512} height={512} ref={canvasRefL5}/>
+          <canvas width={512} height={512} ref={canvasRefL5} />
         </div>
         <div>
-          <canvas width={512} height={512} ref={canvasRefL6}/>
+          <canvas width={512} height={512} ref={canvasRefL6} />
         </div>
         <div>
-          <canvas width={512} height={512} ref={canvasRefOverlay}/>
+          <canvas width={512} height={512} ref={canvasRefOverlay} />
         </div>
-        <canvas hidden={true} width={2048} height={2048} ref={hiddenRef}/>
+        <canvas hidden={true} width={2048} height={2048} ref={hiddenRef} />
       </div>
       <div
         style={{ 'height': '50vw', 'width': '20em', 'maxHeight': '80vh', 'display': 'inline-block', 'marginTop': '0px' }}
       >
         <div style={{ 'width': '100%', 'height': 'calc(100% - 9em)' }}>
-          <div style={{ 'width': '100%', 'height': '1.5em', 'fontSize': '1.5em', display: 'flex', flexDirection: 'row'  }}>
-            {'Color Map for Values'}
-            <div style={{"flex": '1', width: '30%'}}>
-              <h3>L5 Cell Color</h3>
-              <GradientBar
-                color={gradientColorL5}
-                sliderPosition={sliderPositionL5}
-                onSliderChange={handleSliderChangeL5}
-              />
 
-              <img
-                src="color-picker.png"
-                alt="Color Picker"
-                style={{ height: '25px' }}
-                onClick={toggleColorPickerL5}
-              />
-
-              {showColorPickerL5 && (
-                <ColorPicker
-                  initialColor={gradientColorL5}
-                  onColorChange={setColormapL5}
-                />
-              )}
+          <div className='gradient-bars-container'>
+            <div className='color-map-title-container'>
+              <div className="color-map-title">{'Color Map for Values'}</div>
             </div>
-
-            <div style={{"flex": '1', width: '30%'}}>
-              <h3>L6 Cell Color</h3>
-
-              <GradientBar
-                color={gradientColorL6}
-                sliderPosition={sliderPositionL6}
-                onSliderChange={handleSliderChangeL6}
-              />
-
-              <img
-                src="color-picker.png"
-                alt="Color Picker"
-                style={{ height: '25px' }}
-                onClick={toggleColorPickerL6}
-              />
-
-              {showColorPickerL6 && (
-                <ColorPicker
-                  initialColor={gradientColorL6}
-                  onColorChange={setColormapL6}
+            <div className="gradient-bar-section">
+              <div className="gradient-bar-container">
+                <h3>L5 Cell Color</h3>
+                <GradientBar
+                  color={colorL5}
+                  sliderPosition={sliderPositionL5}
+                  onSliderChange={handleSliderChangeL5}
                 />
-              )}
-            </div>
-            <div style={{"flex": '1', width: '30%'}}>
-              <h3>Overlap Color</h3>
 
-              <GradientBar
-                color={gradientColorOverlay}
-                sliderPosition={sliderPositionOverlay}
-                onSliderChange={handleSliderChangeOverlay}
-              />
-
-              <img
-                src="color-picker.png"
-                alt="Color Picker"
-                style={{ height: '25px' }}
-                onClick={toggleColorPickerOverlay}
-              />
-
-              {showColorPickerOverlay && (
-                <ColorPicker
-                  initialColor={gradientColorOverlay}
-                  onColorChange={setColormapOverlay}
+                <img
+                  src="color-picker.png"
+                  alt="Color Picker"
+                  style={{ height: '25px' }}
+                  onClick={toggleColorPickerL5}
                 />
-              )}
+
+                {showColorPickerL5 && (
+                  <ColorPicker
+                    initialColor={colorL5}
+                    onColorChange={setColormapL5}
+                  />
+                )}
+              </div>
+
+              <div className="gradient-bar-container">
+                <h3>L6 Cell Color</h3>
+
+                <GradientBar
+                  color={colorL6}
+                  sliderPosition={sliderPositionL6}
+                  onSliderChange={handleSliderChangeL6}
+                />
+
+                <img
+                  src="color-picker.png"
+                  alt="Color Picker"
+                  style={{ height: '25px' }}
+                  onClick={toggleColorPickerL6}
+                />
+
+                {showColorPickerL6 && (
+                  <ColorPicker
+                    initialColor={colorL6}
+                    onColorChange={setColormapL6}
+                  />
+                )}
+              </div>
+              <div className="gradient-bar-container">
+                <h3>Overlap Color</h3>
+
+                <GradientBar
+                  color={colorOverlay}
+                  sliderPosition={sliderPositionOverlay}
+                  onSliderChange={handleSliderChangeOverlay}
+                />
+
+                <img
+                  src="color-picker.png"
+                  alt="Color Picker"
+                  style={{ height: '25px' }}
+                  onClick={toggleColorPickerOverlay}
+                />
+
+                {showColorPickerOverlay && (
+                  <ColorPicker
+                    initialColor={colorOverlay}
+                    onColorChange={setColormapOverlay}
+                  />
+                )}
+              </div>
             </div>
           </div>
-
           <div style={{ 'width': '100%', 'height': 'calc(100% - 2em)' }}>
           </div>
         </div>
