@@ -10,6 +10,9 @@ import ColorPicker from './ColorPicker';
 import * as d3 from 'd3';
 import * as tiff from 'tiff'
 
+// FIXME: import panzoom
+import Panzoom from '@panzoom/panzoom'
+
 function App() {
 
   //data
@@ -67,6 +70,19 @@ function App() {
     var dstContext = canvasRef.current.getContext("2d");
     dstContext.scale(0.2, 0.2);
     dstContext.drawImage(canvas, 0, 0);
+
+      // FIXME: use the imported Panzoom to pan and zoom on the L5 canvas
+    var canvasL5 = canvasRefL5.current
+      const panZoomL5 = Panzoom(canvasL5, {
+      maxScale: 5
+    })
+    panZoomL5.pan(10, 10)
+    panZoomL5.zoom(2, {
+      animate: true
+    })
+
+    // use event listener; when user scrolls with mousewheel, zoom
+    canvasL5.addEventListener('wheel', panZoomL5.zoomWithWheel)
   
     return canvas;
   }
@@ -197,9 +213,11 @@ function App() {
       <div style={{'maxHeight': '7vh'}}>
         <h1>{"Visualization of Cortical Cell Expressiveness"}</h1>
       </div>
-      <canvas width={512} height={512} ref={canvasRefL5}/>
-      <canvas width={512} height={512} ref={canvasRefL6}/>
-      <canvas hidden={true} width={2048} height={2048} ref={hiddenRef}/>
+      <div>
+        <canvas width={512} height={512} ref={canvasRefL5}/>
+        <canvas width={512} height={512} ref={canvasRefL6}/>
+        <canvas hidden={true} width={2048} height={2048} ref={hiddenRef}/>
+      </div>
       {/* <div 
         className={'shadow'}
         style={{'height':'20vw','width':'calc(49vw - 10em)','maxHeight':'80vh','display':'inline-block','margin':'3px'}}
