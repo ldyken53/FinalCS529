@@ -360,8 +360,9 @@ function App() {
                   alt="Color Picker"
                   style={{ height: '25px' }}
                   onClick={toggleColorPickerL5}
+                  id='colorPickerL5'
                 />
-                <label>Click to Open/Close</label>
+                <label onClick={toggleColorPickerL5} htmlFor='colorPickerL5'>Click to Open/Close</label>
 
                 {showColorPickerL5 && (
                   <ColorPicker
@@ -385,8 +386,9 @@ function App() {
                   alt="Color Picker"
                   style={{ height: '25px' }}
                   onClick={toggleColorPickerL6}
+                  id='colorPickerL6'
                 />
-                <label>Click to Open/Close</label>
+                <label onClick={toggleColorPickerL6} htmlFor='colorPickerL6'>Click to Open/Close</label>
 
                 {showColorPickerL6 && (
                   <ColorPicker
@@ -409,8 +411,9 @@ function App() {
                   alt="Color Picker"
                   style={{ height: '25px' }}
                   onClick={toggleColorPickerOverlay}
+                  id='colorPickerOverlay'
                 />
-                <label>Click to Open/Close</label>
+                <label onClick={toggleColorPickerOverlay} htmlFor='colorPickerOverlay'>Click to Open/Close</label>
 
                 {showColorPickerOverlay && (
                   <ColorPicker
