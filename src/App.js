@@ -71,18 +71,18 @@ function App() {
     dstContext.scale(0.2, 0.2);
     dstContext.drawImage(canvas, 0, 0);
 
-      // FIXME: use the imported Panzoom to pan and zoom on the L5 canvas
-    var canvasL5 = canvasRefL5.current
-      const panZoomL5 = Panzoom(canvasL5, {
+      // FIXME: use the imported Panzoom to pan and zoom on the L5 and L6 canvases
+    var canvasL = canvasRef.current
+      const panZoomL = Panzoom(canvasL, {
       maxScale: 5
     })
-    panZoomL5.pan(10, 10)
-    panZoomL5.zoom(2, {
+    panZoomL.pan(10, 10)
+    panZoomL.zoom(2, {
       animate: true
     })
 
-    // use event listener; when user scrolls with mousewheel, zoom
-    canvasL5.addEventListener('wheel', panZoomL5.zoomWithWheel)
+    // FIXME: use event listener; when user scrolls with mousewheel, zoom
+    canvasL.addEventListener('wheel', panZoomL.zoomWithWheel)
   
     return canvas;
   }
