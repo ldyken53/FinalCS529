@@ -7,13 +7,13 @@ import GradientBar from './GradientBar';
 import * as d3 from 'd3';
 import * as tiff from 'tiff'
 
-// FIXME: import panzoom
 import Panzoom from '@panzoom/panzoom'
+import Slider from '@mui/material/Slider';
 
 function App() {
-  const [colorL5, setColorL5] = useState('#D03402');
-  const [colorL6, setColorL6] = useState('#F8E71C');
-  const [colorOverlay, setColorOverlay] = useState('#F5A623');
+  const [colorL5, setColorL5] = useState('#F86A02');
+  const [colorL6, setColorL6] = useState('#084594');
+  const [colorOverlay, setColorOverlay] = useState('#417505');
   const [overlayRendered, setOverlayRendered] = useState(false);
 
   // Initial colors for the gradient bars
@@ -24,6 +24,17 @@ function App() {
   const [gradientColorL5, setGradientColorL5] = useState(initialColorL5);
   const [gradientColorL6, setGradientColorL6] = useState(initialColorL6);
   const [gradientColorOverlay, setGradientColorOverlay] = useState(initialColorOverlay);
+
+  const [thresholdL5, setThresholdL5] = useState(0.2);
+  const [thresholdL6, setThresholdL6] = useState(0.2);
+  useEffect(() => {
+    imshow(dataL5, 1, d3.interpolateRgb("#ffffff", colorL5), canvasRefL5, 1, thresholdL5);
+    renderOverlay(d3.interpolateRgb("#ffffff", colorL5), d3.interpolateRgb("#ffffff", colorL6), d3.interpolateRgb("#ffffff", colorOverlay));
+  }, [thresholdL5]);
+  useEffect(() => {
+    imshow(dataL6, 1, d3.interpolateRgb("#ffffff", colorL6), canvasRefL6, 1, thresholdL6)
+    renderOverlay(d3.interpolateRgb("#ffffff", colorL5), d3.interpolateRgb("#ffffff", colorL6), d3.interpolateRgb("#ffffff", colorOverlay));
+  }, [thresholdL6]);
 
   const [showColorPickerL5, setShowColorPickerL5] = useState(false);
   const [showColorPickerL6, setShowColorPickerL6] = useState(false);
@@ -69,7 +80,7 @@ function App() {
 
   const setColormapL5 = (newColor) => {
     setColorL5(newColor);
-    imshow(dataL5, 1, d3.interpolateRgb("#ffffff", newColor), canvasRefL5, 1);
+    imshow(dataL5, 1, d3.interpolateRgb("#ffffff", newColor), canvasRefL5, 1, thresholdL5);
     renderOverlay(
       d3.interpolateRgb("#ffffff", newColor),
       d3.interpolateRgb("#ffffff", colorL6),
@@ -79,7 +90,7 @@ function App() {
 
   const setColormapL6 = (newColor) => {
     setColorL6(newColor);
-    imshow(dataL6, 1, d3.interpolateRgb("#ffffff", newColor), canvasRefL6, 1);
+    imshow(dataL6, 1, d3.interpolateRgb("#ffffff", newColor), canvasRefL6, 1, thresholdL6);
     renderOverlay(
       d3.interpolateRgb("#ffffff", colorL5),
       d3.interpolateRgb("#ffffff", newColor),
@@ -102,38 +113,38 @@ function App() {
   var hiddenRef = useRef(null);
   var dataFetched = false;
 
-  function imshow(data, pixelSize, color, canvasRef, scale) {
-    // Flatten 2D input array
-    const flat = [].concat.apply([], data);
-    // Color Scale & Min-Max normalization
-    const [min, max] = d3.extent(flat);
-    const normalize = d => ((d - min) / (max - min));
-    const colorScale = d => color(normalize(d));
-    // Shape of input array
-    const shape = { x: data[0].length, y: data.length };
+  function imshow(data, pixelSize, color, canvasRef, scale, threshold) {
+    if (data) {
+      // Flatten 2D input array
+      const flat = [].concat.apply([], data);
+      // Color Scale & Min-Max normalization
+      const [min, max] = d3.extent(flat);
+      const normalize = d => ((d - min) / (max - min));
+      const colorScale = d => color(normalize(d));
+      // Shape of input array
+      const shape = { x: data[0].length, y: data.length };
 
-    // Set up canvas element
-    const canvas = hiddenRef.current;
-    const context = canvas.getContext("2d");
-    canvas.style.width = `${shape.x * pixelSize}px`
-    canvas.style.height = `${shape.y * pixelSize}px`;
-    canvas.style.imageRendering = "pixelated";
+      // Set up canvas element
+      const canvas = hiddenRef.current;
+      const context = canvas.getContext("2d");
+      canvas.style.width = `${shape.x * pixelSize}px`
+      canvas.style.height = `${shape.y * pixelSize}px`;
+      canvas.style.imageRendering = "pixelated";
 
-    // Draw pixels to the canvas
-    const imageData = context.createImageData(shape.x, shape.y);
-    flat.forEach((d, i) => {
-      let color = isNaN(d) ? { r: 0, g: 0, b: 0 } : d3.color(colorScale(d));
-      imageData.data[i * 4] = color.r;
-      imageData.data[i * 4 + 1] = color.g;
-      imageData.data[i * 4 + 2] = color.b;
-      imageData.data[i * 4 + 3] = 255;
-    });
-    context.putImageData(imageData, 0, 0);
-    var dstContext = canvasRef.current.getContext("2d");
-    dstContext.scale(scale, scale);
-    dstContext.drawImage(canvas, 0, 0);
-
-    return canvas;
+      // Draw pixels to the canvas
+      const imageData = context.createImageData(shape.x, shape.y);
+      flat.forEach((d, i) => {
+        let color = normalize(d) < 0 ? { r: 255, g: 255, b: 255 } : d3.color(colorScale(d));
+        imageData.data[i * 4] = color.r;
+        imageData.data[i * 4 + 1] = color.g;
+        imageData.data[i * 4 + 2] = color.b;
+        imageData.data[i * 4 + 3] = 255;
+      });
+      context.putImageData(imageData, 0, 0);
+      var dstContext = canvasRef.current.getContext("2d");
+      dstContext.scale(scale, scale);
+      dstContext.drawImage(canvas, 0, 0);
+    }
   }
 
   async function fetchData() {
@@ -147,7 +158,7 @@ function App() {
             data[i].push(tif[0].data[i * 2048 + j - 1]);
           }
         }
-        imshow(data, 1, d3.interpolateRgb("#ffffff", colorL5), canvasRefL5, 0.2);
+        imshow(data, 1, d3.interpolateRgb("#ffffff", colorL5), canvasRefL5, 0.2, thresholdL5);
         setDataL5(data);
       })
     )
@@ -161,7 +172,7 @@ function App() {
             data[i].push(tif[0].data[i * 2048 + j - 1]);
           }
         }
-        imshow(data, 1, d3.interpolateRgb("#ffffff", colorL6), canvasRefL6, 0.2);
+        imshow(data, 1, d3.interpolateRgb("#ffffff", colorL6), canvasRefL6, 0.2, thresholdL6);
         setDataL6(data);
       })
     )
@@ -226,7 +237,6 @@ function App() {
     document.addEventListener('pointermove', panZoomOverlay.handleMove)
     document.addEventListener('pointerup', panZoomOverlay.handleUp)
 
-    // FIXME: use event listener; when user scrolls with mousewheel, zoom
     canvasRefL5.current.addEventListener('wheel', (event) => {
       if (event.deltaY > 0) {
         panZoomL5.zoomIn({ animate: false });
@@ -287,18 +297,18 @@ function App() {
       canvas.style.width = `${shape.x}px`
       canvas.style.height = `${shape.y}px`;
       canvas.style.imageRendering = "pixelated";
-
+      console.log(thresholdL5, thresholdL6);
       // Draw pixels to the canvas
       const imageData = context.createImageData(shape.x, shape.y);
       flatL5.forEach((d, i) => {
         let color = { r: 255, g: 255, b: 255 };
-        if (normalizeL5(d) > 0.2) {
-          if (normalizeL6(flatL6[i]) > 0.2) {
+        if (normalizeL5(d) > thresholdL5) {
+          if (normalizeL6(flatL6[i]) > thresholdL6) {
             color = d3.color(colorOverlay((normalizeL5(d) + normalizeL6(flatL6[i])) / 2));
           } else {
             color = d3.color(colorScaleL5(d));
           }
-        } else if (normalizeL6(flatL6[i]) > 0.2) {
+        } else if (normalizeL6(flatL6[i]) > thresholdL6) {
           color = d3.color(colorScaleL6(flatL6[i]));
         }
         imageData.data[i * 4] = color.r;
@@ -308,7 +318,6 @@ function App() {
       });
       context.putImageData(imageData, 0, 0);
       var dstContext = canvasRefOverlay.current.getContext("2d");
-      console.log(scale);
       dstContext.scale(scale, scale);
       dstContext.drawImage(canvas, 0, 0);
 
@@ -325,6 +334,34 @@ function App() {
         <h1>{"Visualization of Cortical Cell Expressiveness"}</h1>
       </div>
       <div>{"Click and Drag to Pan, Scroll to Zoom"}</div>
+      {/* <div className='sliders-container'>
+        <div className="slider-section">
+          <div className="slider-label">L5 Threshold</div>
+          <div className="slider-container">
+            <Slider 
+              defaultValue={thresholdL5} 
+              step={0.05}
+              min={0.0}
+              max={1.0}
+              aria-label="Default" 
+              valueLabelDisplay="auto" 
+              onChangeCommitted={(event, newValue) => {setThresholdL5(newValue)}}
+            />
+          </div>
+          <div className="slider-label">L6 Threshold</div>
+          <div className="slider-container">
+            <Slider 
+              defaultValue={thresholdL6} 
+              step={0.05}
+              min={0.0}
+              max={1.0}
+              aria-label="Default" 
+              valueLabelDisplay="auto"  
+              onChangeCommitted={(event, newValue) => {setThresholdL6(newValue)}}
+            />          
+          </div>
+        </div>
+      </div> */}
       <div style={{ 'display': 'flex', 'flex-direction': 'row', 'justify-content': 'center' }}>
         <div>
           <canvas width={512} height={512} ref={canvasRefL5} />
