@@ -184,7 +184,7 @@ function App() {
       step: 0.1
     });
     panZoomL5.pan(10, 10)
-    panZoomL5.zoom(2, {
+    panZoomL5.zoom(1, {
       animate: true
     });
     const panZoomL6 = Panzoom(canvasRefL6.current, {
@@ -195,7 +195,7 @@ function App() {
       step: 0.1
     });
     panZoomL6.pan(10, 10)
-    panZoomL6.zoom(2, {
+    panZoomL6.zoom(1, {
       animate: true
     });
     const panZoomOverlay = Panzoom(canvasRefOverlay.current, {
@@ -206,7 +206,7 @@ function App() {
       step: 0.1
     });
     panZoomOverlay.pan(10, 10);
-    panZoomOverlay.zoom(2, {
+    panZoomOverlay.zoom(1, {
       animate: true
     });
 
