@@ -11,9 +11,9 @@ import * as tiff from 'tiff'
 import Panzoom from '@panzoom/panzoom'
 
 function App() {
-  const [colorL5, setColorL5] = useState('#F86A02');
-  const [colorL6, setColorL6] = useState('#084594');
-  const [colorOverlay, setColorOverlay] = useState('#417505');
+  const [colorL5, setColorL5] = useState('#D03402');
+  const [colorL6, setColorL6] = useState('#F8E71C');
+  const [colorOverlay, setColorOverlay] = useState('#F5A623');
   const [overlayRendered, setOverlayRendered] = useState(false);
 
   // Initial colors for the gradient bars
@@ -292,13 +292,13 @@ function App() {
       const imageData = context.createImageData(shape.x, shape.y);
       flatL5.forEach((d, i) => {
         let color = { r: 255, g: 255, b: 255 };
-        if (normalizeL5(d) > 0.15) {
-          if (normalizeL6(flatL6[i]) > 0.15) {
+        if (normalizeL5(d) > 0.2) {
+          if (normalizeL6(flatL6[i]) > 0.2) {
             color = d3.color(colorOverlay((normalizeL5(d) + normalizeL6(flatL6[i])) / 2));
           } else {
             color = d3.color(colorScaleL5(d));
           }
-        } else if (normalizeL6(flatL6[i]) > 0.15) {
+        } else if (normalizeL6(flatL6[i]) > 0.2) {
           color = d3.color(colorScaleL6(flatL6[i]));
         }
         imageData.data[i * 4] = color.r;
