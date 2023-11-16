@@ -213,9 +213,13 @@ function App() {
       <div style={{'maxHeight': '7vh'}}>
         <h1>{"Visualization of Cortical Cell Expressiveness"}</h1>
       </div>
-      <div>
-        <canvas width={512} height={512} ref={canvasRefL5}/>
-        <canvas width={512} height={512} ref={canvasRefL6}/>
+      <div style={{'display': 'flex', 'flex-direction': 'row', 'justify-content': 'center'}}>
+        <div>
+          <canvas width={512} height={512} ref={canvasRefL5}/>
+        </div>
+        <div>
+          <canvas width={512} height={512} ref={canvasRefL6}/>
+        </div>
         <canvas hidden={true} width={2048} height={2048} ref={hiddenRef}/>
       </div>
       {/* <div 
