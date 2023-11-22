@@ -118,6 +118,7 @@ function App() {
 
   function imshow(data, pixelSize, color, canvasRef, scale, threshold) {
     if (data) {
+      console.time("imshow");
       // Flatten 2D input array
       const flat = [].concat.apply([], data);
       // Color Scale & Min-Max normalization
@@ -136,17 +137,21 @@ function App() {
 
       // Draw pixels to the canvas
       const imageData = context.createImageData(shape.x, shape.y);
+      console.time("foreach");
       flat.forEach((d, i) => {
+        // TODO: THIS D3.color is really slow!!!
         let color = normalize(d) < threshold ? { r: 255, g: 255, b: 255 } : d3.color(colorScale(d));
         imageData.data[i * 4] = color.r;
         imageData.data[i * 4 + 1] = color.g;
         imageData.data[i * 4 + 2] = color.b;
         imageData.data[i * 4 + 3] = 255;
       });
+      console.timeEnd("foreach");
       context.putImageData(imageData, 0, 0);
       var dstContext = canvasRef.current.getContext("2d");
       dstContext.scale(scale, scale);
       dstContext.drawImage(canvas, 0, 0);
+      console.timeEnd("imshow");
     }
   }
 
@@ -161,7 +166,7 @@ function App() {
             data[i].push(tif[0].data[i * 2048 + j - 1]);
           }
         }
-        imshow(data, 1, d3.interpolateRgb("#ffffff", colorL5), canvasRefL5, 1.0, 0);
+        imshow(data, 1, d3.interpolateRgb("#ffffff", colorL5), canvasRefL5, 1.0, thresholdL5);
         setDataL5(data);
       })
     )
@@ -175,7 +180,7 @@ function App() {
             data[i].push(tif[0].data[i * 2048 + j - 1]);
           }
         }
-        imshow(data, 1, d3.interpolateRgb("#ffffff", colorL6), canvasRefL6, 1.0, 0);
+        imshow(data, 1, d3.interpolateRgb("#ffffff", colorL6), canvasRefL6, 1.0, thresholdL6);
         setDataL6(data);
       })
     )
@@ -287,6 +292,7 @@ function App() {
 
   function renderOverlay(colorL5, colorL6, colorOverlay) {
     if (dataL5 && dataL6) {
+      console.time("renderoverlay");
       let scale = 1.0;
       if (overlayRendered) {
         scale = 1.0;
@@ -335,6 +341,7 @@ function App() {
       dstContext.drawImage(canvas, 0, 0);
 
       setOverlayRendered(true);
+      console.timeEnd("renderoverlay");
     }
   }
 
