@@ -158,7 +158,7 @@ function App() {
             data[i].push(tif[0].data[i * 2048 + j - 1]);
           }
         }
-        imshow(data, 1, d3.interpolateRgb("#ffffff", colorL5), canvasRefL5, 0.2, thresholdL5);
+        imshow(data, 1, d3.interpolateRgb("#ffffff", colorL5), canvasRefL5, 1.0, thresholdL5);
         setDataL5(data);
       })
     )
@@ -172,7 +172,7 @@ function App() {
             data[i].push(tif[0].data[i * 2048 + j - 1]);
           }
         }
-        imshow(data, 1, d3.interpolateRgb("#ffffff", colorL6), canvasRefL6, 0.2, thresholdL6);
+        imshow(data, 1, d3.interpolateRgb("#ffffff", colorL6), canvasRefL6, 1.0, thresholdL6);
         setDataL6(data);
       })
     )
@@ -190,34 +190,42 @@ function App() {
     const panZoomL5 = Panzoom(canvasRefL5.current, {
       maxScale: 5,
       zoomSpeed: 1,
-      minScale: 1,
+      minScale: 0.2,
       noBind: true,
-      step: 0.1
+      step: 0.1,
+      origin: '12.5% 12.5%',
+      startX: -750,
+      startY: -550
     });
-    panZoomL5.pan(10, 10)
-    panZoomL5.zoom(1, {
+    panZoomL5.zoom(0.25, {
       animate: true
     });
     const panZoomL6 = Panzoom(canvasRefL6.current, {
       maxScale: 5,
       zoomSpeed: 1,
-      minScale: 1,
+      minScale: 0.2,
       noBind: true,
-      step: 0.1
+      step: 0.1,
+      origin: '12.5% 12.5%',
+      startX: -750,
+      startY: -550
     });
-    panZoomL6.pan(10, 10)
-    panZoomL6.zoom(1, {
+    panZoomL6.pan(0, 0)
+    panZoomL6.zoom(0.25, {
       animate: true
     });
     const panZoomOverlay = Panzoom(canvasRefOverlay.current, {
       maxScale: 5,
       zoomSpeed: 1,
-      minScale: 1,
+      minScale: 0.2,
       noBind: true,
-      step: 0.1
+      step: 0.1,
+      origin: '12.5% 12.5%',
+      startX: -750,
+      startY: -550
     });
-    panZoomOverlay.pan(10, 10);
-    panZoomOverlay.zoom(1, {
+    panZoomOverlay.pan(0, 0);
+    panZoomOverlay.zoom(0.25, {
       animate: true
     });
 
@@ -270,11 +278,13 @@ function App() {
         panZoomOverlay.zoomOut({ animate: false });
       }
     });
+
+    panZoomL5.pan(1000, 1000);
   }
 
   function renderOverlay(colorL5, colorL6, colorOverlay) {
     if (dataL5 && dataL6) {
-      let scale = 0.2;
+      let scale = 1.0;
       if (overlayRendered) {
         scale = 1.0;
       }
@@ -364,13 +374,13 @@ function App() {
       </div> */}
       <div style={{ 'display': 'flex', 'flex-direction': 'row', 'justify-content': 'center' }}>
         <div>
-          <canvas width={512} height={512} ref={canvasRefL5} />
+          <canvas width={2048} height={2048} ref={canvasRefL5} />
         </div>
         <div>
-          <canvas width={512} height={512} ref={canvasRefL6} />
+          <canvas width={2048} height={2048} ref={canvasRefL6} />
         </div>
         <div>
-          <canvas width={512} height={512} ref={canvasRefOverlay} />
+          <canvas width={2048} height={2048} ref={canvasRefOverlay} />
         </div>
         <canvas hidden={true} width={2048} height={2048} ref={hiddenRef} />
       </div>
