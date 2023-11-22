@@ -53,6 +53,9 @@ function App() {
   useEffect(() => {
     renderOverlay(d3.interpolateRgb("#ffffff", colorL5), d3.interpolateRgb("#ffffff", colorL6), d3.interpolateRgb("#ffffff", colorOverlay));
   }, [dataL6]);
+  useEffect(() => {
+    renderOverlay(d3.interpolateRgb("#ffffff", colorL5), d3.interpolateRgb("#ffffff", colorL6), d3.interpolateRgb("#ffffff", colorOverlay));
+  }, [dataL5]);
 
   const [hue, setHue] = useState(0); // The base hue for the color
   const [saturation, setSaturation] = useState(100);
@@ -134,7 +137,7 @@ function App() {
       // Draw pixels to the canvas
       const imageData = context.createImageData(shape.x, shape.y);
       flat.forEach((d, i) => {
-        let color = normalize(d) < 0 ? { r: 255, g: 255, b: 255 } : d3.color(colorScale(d));
+        let color = normalize(d) < threshold ? { r: 255, g: 255, b: 255 } : d3.color(colorScale(d));
         imageData.data[i * 4] = color.r;
         imageData.data[i * 4 + 1] = color.g;
         imageData.data[i * 4 + 2] = color.b;
@@ -158,7 +161,7 @@ function App() {
             data[i].push(tif[0].data[i * 2048 + j - 1]);
           }
         }
-        imshow(data, 1, d3.interpolateRgb("#ffffff", colorL5), canvasRefL5, 1.0, thresholdL5);
+        imshow(data, 1, d3.interpolateRgb("#ffffff", colorL5), canvasRefL5, 1.0, 0);
         setDataL5(data);
       })
     )
@@ -172,7 +175,7 @@ function App() {
             data[i].push(tif[0].data[i * 2048 + j - 1]);
           }
         }
-        imshow(data, 1, d3.interpolateRgb("#ffffff", colorL6), canvasRefL6, 1.0, thresholdL6);
+        imshow(data, 1, d3.interpolateRgb("#ffffff", colorL6), canvasRefL6, 1.0, 0);
         setDataL6(data);
       })
     )
@@ -195,7 +198,7 @@ function App() {
       step: 0.1,
       origin: '12.5% 12.5%',
       startX: -750,
-      startY: -550
+      startY: -650
     });
     panZoomL5.zoom(0.25, {
       animate: true
@@ -208,7 +211,7 @@ function App() {
       step: 0.1,
       origin: '12.5% 12.5%',
       startX: -750,
-      startY: -550
+      startY: -650
     });
     panZoomL6.pan(0, 0)
     panZoomL6.zoom(0.25, {
@@ -222,7 +225,7 @@ function App() {
       step: 0.1,
       origin: '12.5% 12.5%',
       startX: -750,
-      startY: -550
+      startY: -650
     });
     panZoomOverlay.pan(0, 0);
     panZoomOverlay.zoom(0.25, {
@@ -344,7 +347,7 @@ function App() {
         <h1>{"Visualization of Cortical Cell Expressiveness"}</h1>
       </div>
       <div>{"Click and Drag to Pan, Scroll to Zoom"}</div>
-      {/* <div className='sliders-container'>
+      <div className='sliders-container'>
         <div className="slider-section">
           <div className="slider-label">L5 Threshold</div>
           <div className="slider-container">
@@ -371,7 +374,7 @@ function App() {
             />          
           </div>
         </div>
-      </div> */}
+      </div>
       <div style={{ 'display': 'flex', 'flex-direction': 'row', 'justify-content': 'center' }}>
         <div>
           <canvas width={2048} height={2048} ref={canvasRefL5} />
