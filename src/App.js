@@ -32,7 +32,7 @@ function App() {
   // Initial colors for the gradient bars
   const initialColorL5 = d3.interpolateOranges(0.5); // Midpoint of interpolateOranges
   const initialColorL6 = d3.interpolateBlues(0.5); // Midpoint of interpolatePurples
-  const initialColorOverlay = d3.interpolateGreens(0.5); // Midpoint of interpolatePurples
+  const initialColorOverlay = d3.interpolateGreens(0.5); // Midpoint of interpolateGreens
 
   const [gradientColorL5, setGradientColorL5] = useState(initialColorL5);
   const [gradientColorL6, setGradientColorL6] = useState(initialColorL6);
@@ -66,6 +66,22 @@ function App() {
   const [sliderPositionL5, setSliderPositionL5] = useState(50); // State for L5 slider position
   const [sliderPositionL6, setSliderPositionL6] = useState(50); // State for L6 slider position
   const [sliderPositionOverlay, setSliderPositionOverlay] = useState(50); // State for L6 slider position
+
+  const [colormapBottomL5, setColormapBottomL5] = useState(0.0);
+  const [colormapTopL5, setColormapTopL5] = useState(1.0);
+  const [colormapBottomL6, setColormapBottomL6] = useState(0.0);
+  const [colormapTopL6, setColormapTopL6] = useState(1.0);
+  const [colormapBottomOverlay, setColormapBottomOverlay] = useState(0.0);
+  const [colormapTopOverlay, setColormapTopOverlay] = useState(1.0);
+  useEffect(() => {
+    colorL5Data();
+  }, [colormapBottomL5, colormapTopL5])
+  useEffect(() => {
+    colorL6Data();
+  }, [colormapBottomL6, colormapTopL6])
+  useEffect(() => {
+    colorOverlayData();
+  }, [colormapBottomOverlay, colormapTopOverlay])
 
   const [colorDataL5, setColorDataL5] = useState();
   const [colorDataL6, setColorDataL6] = useState();
@@ -134,6 +150,27 @@ function App() {
     // Additional logic to convert newPosition to a color for L6, if needed
   };
 
+  const handleSliderFinishL5 = () => {
+    var bottom = sliderPositionL5 > 50 ? (sliderPositionL5 - 50) / 50 : 0;
+    var top = sliderPositionL5 < 50 ? sliderPositionL5 / 50 : 1;
+    setColormapBottomL5(bottom);
+    setColormapTopL5(top);
+  }
+
+  const handleSliderFinishL6 = () => {
+    var bottom = sliderPositionL6 > 50 ? (sliderPositionL6 - 50) / 50 : 0;
+    var top = sliderPositionL6 < 50 ? sliderPositionL6 / 50 : 1;
+    setColormapBottomL6(bottom);
+    setColormapTopL6(top);
+  }
+
+  const handleSliderFinishOverlay = () => {
+    var bottom = sliderPositionOverlay > 50 ? (sliderPositionOverlay - 50) / 50 : 0;
+    var top = sliderPositionOverlay < 50 ? sliderPositionOverlay / 50 : 1;
+    setColormapBottomOverlay(bottom);
+    setColormapTopOverlay(top);
+  }
+
   const setColormapL5 = (newColor) => {
     setColorL5(newColor);
   }
@@ -163,22 +200,30 @@ function App() {
   }
 
   function colorL5Data() {
+    console.time('color');
     if (dataL5) {
-      var colormap = d3.interpolateRgb("#ffffff", colorL5);
+      var colormap = d3.interpolateRgb(
+        d3.interpolateRgb("#ffffff", colorL5)(colormapBottomL5), d3.interpolateRgb("#ffffff", colorL5)(colormapTopL5)
+      );
       setColorDataL5(dataL5.map(value => d3.color(colormap(value))));
     }
+    console.timeEnd('color');
   }
 
   function colorL6Data() {
     if (dataL6) {
-      var colormap = d3.interpolateRgb("#ffffff", colorL6);
+      var colormap = d3.interpolateRgb(
+        d3.interpolateRgb("#ffffff", colorL5)(colormapBottomL6), d3.interpolateRgb("#ffffff", colorL6)(colormapTopL6)
+      );
       setColorDataL6(dataL6.map(value => d3.color(colormap(value))));
     }
   }
 
   function colorOverlayData() {
     if (dataL6 && dataL5) {
-      var colormap = d3.interpolateRgb("#ffffff", colorOverlay);
+      var colormap = d3.interpolateRgb(
+        d3.interpolateRgb("#ffffff", colorL5)(colormapBottomOverlay), d3.interpolateRgb("#ffffff", colorOverlay)(colormapTopOverlay)
+      );
       setColorDataOverlay(dataOverlay.map(value => d3.color(colormap(value))));
     }
   }
@@ -516,6 +561,7 @@ function App() {
                   color={colorL5}
                   sliderPosition={sliderPositionL5}
                   onSliderChange={handleSliderChangeL5}
+                  onFinishChange={handleSliderFinishL5}
                 />
 
                 <img
@@ -542,6 +588,7 @@ function App() {
                   color={colorL6}
                   sliderPosition={sliderPositionL6}
                   onSliderChange={handleSliderChangeL6}
+                  onFinishChange={handleSliderFinishL6}
                 />
 
                 <img
@@ -567,6 +614,7 @@ function App() {
                   color={colorOverlay}
                   sliderPosition={sliderPositionOverlay}
                   onSliderChange={handleSliderChangeOverlay}
+                  onFinishChange={handleSliderFinishOverlay}
                 />
 
                 <img

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import * as d3 from 'd3';
 
-const GradientBar = ({ color, onSliderChange, sliderPosition }) => {
+const GradientBar = ({ color, onSliderChange, onFinishChange, sliderPosition }) => {
     const [isDragging, setIsDragging] = useState(false);
     const [sliderColor, setSliderColor] = useState(color);
 
@@ -40,14 +40,18 @@ const GradientBar = ({ color, onSliderChange, sliderPosition }) => {
         setIsDragging(true);
     };
 
-    const handleMouseUp = () => {
+    const handleMouseUp = (event) => {
         setIsDragging(false);
+        barRect = document.getElementById('colorBar').getBoundingClientRect()
+        let newSliderPosition = ((event.clientX - barRect.left) / barRect.width) * 100;
+        //console.log("Mouse Position: ", event.clientX, newSliderPosition, barRect.left, barRect.width)
+        newSliderPosition = Math.max(0, Math.min(newSliderPosition, 100)); // Clamp between 0 and 100
+        onFinishChange(newSliderPosition);
     };
 
     const handleMouseMove = (event) => {
         if (isDragging) {
             barRect = document.getElementById('colorBar').getBoundingClientRect()
-            console.log(event.target)
             let newSliderPosition = ((event.clientX - barRect.left) / barRect.width) * 100;
             //console.log("Mouse Position: ", event.clientX, newSliderPosition, barRect.left, barRect.width)
             newSliderPosition = Math.max(0, Math.min(newSliderPosition, 100)); // Clamp between 0 and 100
