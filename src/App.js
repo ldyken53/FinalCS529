@@ -11,10 +11,21 @@ import Panzoom from '@panzoom/panzoom'
 import Slider from '@mui/material/Slider';
 
 function App() {
+  const dataW = 2048;
+  const dataH = 2048;
+
   const [colorL5, setColorL5] = useState('#F86A02');
   const [colorL6, setColorL6] = useState('#084594');
   const [colorOverlay, setColorOverlay] = useState('#417505');
-  const [overlayRendered, setOverlayRendered] = useState(false);
+  useEffect(() => {
+    colorL5Data();
+  }, [colorL5]);
+  useEffect(() => {
+    colorL6Data();
+  }, [colorL6]);
+  useEffect(() => {
+    colorOverlayData();
+  }, [colorOverlay]);
 
   // Initial colors for the gradient bars
   const initialColorL5 = d3.interpolateOranges(0.5); // Midpoint of interpolateOranges
@@ -28,12 +39,12 @@ function App() {
   const [thresholdL5, setThresholdL5] = useState(0.2);
   const [thresholdL6, setThresholdL6] = useState(0.2);
   useEffect(() => {
-    imshow(dataL5, 1, d3.interpolateRgb("#ffffff", colorL5), canvasRefL5, 1, thresholdL5);
-    renderOverlay(d3.interpolateRgb("#ffffff", colorL5), d3.interpolateRgb("#ffffff", colorL6), d3.interpolateRgb("#ffffff", colorOverlay));
+    imShowL5();
+    imShowOverlay();
   }, [thresholdL5]);
   useEffect(() => {
-    imshow(dataL6, 1, d3.interpolateRgb("#ffffff", colorL6), canvasRefL6, 1, thresholdL6)
-    renderOverlay(d3.interpolateRgb("#ffffff", colorL5), d3.interpolateRgb("#ffffff", colorL6), d3.interpolateRgb("#ffffff", colorOverlay));
+    imShowL6();
+    imShowOverlay();
   }, [thresholdL6]);
 
   const [showColorPickerL5, setShowColorPickerL5] = useState(false);
@@ -48,14 +59,35 @@ function App() {
   const [sliderPositionL6, setSliderPositionL6] = useState(50); // State for L6 slider position
   const [sliderPositionOverlay, setSliderPositionOverlay] = useState(50); // State for L6 slider position
 
+  const [colorDataL5, setColorDataL5] = useState();
+  const [colorDataL6, setColorDataL6] = useState();
+  const [colorDataOverlay, setColorDataOverlay] = useState();
+  useEffect(() => {
+    imShowL5();
+    imShowOverlay();
+  }, [colorDataL5]);
+  useEffect(() => {
+    imShowL6();
+    imShowOverlay();
+  }, [colorDataL6]);
+  useEffect(() => {
+    imShowOverlay();
+  }, [colorDataOverlay]);
+
   const [dataL5, setDataL5] = useState();
   const [dataL6, setDataL6] = useState();
+  const [dataOverlay, setDataOverlay] = useState();
   useEffect(() => {
-    renderOverlay(d3.interpolateRgb("#ffffff", colorL5), d3.interpolateRgb("#ffffff", colorL6), d3.interpolateRgb("#ffffff", colorOverlay));
+    overlayData();
+    colorL5Data();
+  }, [dataL5]);
+  useEffect(() => {
+    overlayData();
+    colorL6Data();
   }, [dataL6]);
   useEffect(() => {
-    renderOverlay(d3.interpolateRgb("#ffffff", colorL5), d3.interpolateRgb("#ffffff", colorL6), d3.interpolateRgb("#ffffff", colorOverlay));
-  }, [dataL5]);
+    colorOverlayData();
+  }, [dataOverlay]);
 
   const [hue, setHue] = useState(0); // The base hue for the color
   const [saturation, setSaturation] = useState(100);
@@ -83,31 +115,14 @@ function App() {
 
   const setColormapL5 = (newColor) => {
     setColorL5(newColor);
-    imshow(dataL5, 1, d3.interpolateRgb("#ffffff", newColor), canvasRefL5, 1, thresholdL5);
-    renderOverlay(
-      d3.interpolateRgb("#ffffff", newColor),
-      d3.interpolateRgb("#ffffff", colorL6),
-      d3.interpolateRgb("#ffffff", colorOverlay)
-    );
   }
 
   const setColormapL6 = (newColor) => {
     setColorL6(newColor);
-    imshow(dataL6, 1, d3.interpolateRgb("#ffffff", newColor), canvasRefL6, 1, thresholdL6);
-    renderOverlay(
-      d3.interpolateRgb("#ffffff", colorL5),
-      d3.interpolateRgb("#ffffff", newColor),
-      d3.interpolateRgb("#ffffff", colorOverlay)
-    );
   }
 
   const setColormapOverlay = (newColor) => {
     setColorOverlay(newColor);
-    renderOverlay(
-      d3.interpolateRgb("#ffffff", colorL5),
-      d3.interpolateRgb("#ffffff", colorL6),
-      d3.interpolateRgb("#ffffff", newColor)
-    );
   }
 
   var canvasRefL5 = useRef(null);
@@ -116,71 +131,132 @@ function App() {
   var hiddenRef = useRef(null);
   var dataFetched = false;
 
-  function imshow(data, pixelSize, color, canvasRef, scale, threshold) {
-    if (data) {
-      console.time("imshow");
-      // Flatten 2D input array
-      const flat = [].concat.apply([], data);
-      // Color Scale & Min-Max normalization
-      const [min, max] = d3.extent(flat);
-      const normalize = d => ((d - min) / (max - min));
-      const colorScale = d => color(normalize(d));
-      // Shape of input array
-      const shape = { x: data[0].length, y: data.length };
+  function colorL5Data() {
+    if (dataL5) {
+      var colormap = d3.interpolateRgb("#ffffff", colorL5);
+      setColorDataL5(dataL5.map(value => d3.color(colormap(value))));
+    }
+  }
 
-      // Set up canvas element
-      const canvas = hiddenRef.current;
+  function colorL6Data() {
+    if (dataL6) {
+      var colormap = d3.interpolateRgb("#ffffff", colorL6);
+      setColorDataL6(dataL6.map(value => d3.color(colormap(value))));
+    }
+  }
+
+  function colorOverlayData() {
+    if (dataL6 && dataL5) {
+      var colormap = d3.interpolateRgb("#ffffff", colorOverlay);
+      setColorDataOverlay(dataOverlay.map(value => d3.color(colormap(value))));
+    }
+  }
+
+
+  function makeImageData(data, colorData, context, threshold) {
+    const imageData = context.createImageData(dataW, dataH);
+    for (var i = 0; i < data.length; i++) {
+      let color = data[i] > threshold ? colorData[i] : {r: 255, g: 255, b: 255};
+      imageData.data[i * 4] = color.r;
+      imageData.data[i * 4 + 1] = color.g;
+      imageData.data[i * 4 + 2] = color.b;
+      imageData.data[i * 4 + 3] = 255;    
+    }
+    return imageData;
+  }
+
+  function imShowL5() {
+    if (colorDataL5) {
+      const canvas = canvasRefL5.current;
       const context = canvas.getContext("2d");
-      canvas.style.width = `${shape.x * pixelSize}px`
-      canvas.style.height = `${shape.y * pixelSize}px`;
-      canvas.style.imageRendering = "pixelated";
-
-      // Draw pixels to the canvas
-      const imageData = context.createImageData(shape.x, shape.y);
       console.time("foreach");
-      flat.forEach((d, i) => {
-        // TODO: THIS D3.color is really slow!!!
-        let color = normalize(d) < threshold ? { r: 255, g: 255, b: 255 } : d3.color(colorScale(d));
+      const imageData = makeImageData(dataL5, colorDataL5, context, thresholdL5);
+      console.timeEnd("foreach");
+      console.log("reshow L5");
+      context.putImageData(imageData, 0, 0);
+    }
+  }
+
+  function imShowL6() {
+    if (colorDataL6) {
+      const canvas = canvasRefL6.current;
+      const context = canvas.getContext("2d");
+      console.time("foreach");
+      const imageData = makeImageData(dataL6, colorDataL6, context, thresholdL6);
+      console.timeEnd("foreach");
+      console.log("reshow L6");
+      context.putImageData(imageData, 0, 0);
+    }
+  }
+
+  function imShowOverlay() {
+    if (colorDataL5 && colorDataL6 && colorDataOverlay) {
+      const canvas = canvasRefOverlay.current;
+      const context = canvas.getContext("2d");
+      console.time("foreach");
+      const imageData = context.createImageData(dataW, dataH);
+      for (var i = 0; i < dataOverlay.length; i++) {
+        let color = { r: 255, g: 255, b: 255 };
+        if (dataL5[i] > thresholdL5) {
+          if (dataL6[i] > thresholdL6) {
+            color = colorDataOverlay[i];
+          } else {
+            color = colorDataL5[i];
+          }
+        } else if (dataL6[i] > thresholdL6) {
+          color = colorDataL6[i];
+        }
         imageData.data[i * 4] = color.r;
         imageData.data[i * 4 + 1] = color.g;
         imageData.data[i * 4 + 2] = color.b;
         imageData.data[i * 4 + 3] = 255;
-      });
+      }  
       console.timeEnd("foreach");
+      console.log("reshow overlay");
       context.putImageData(imageData, 0, 0);
-      var dstContext = canvasRef.current.getContext("2d");
-      dstContext.scale(scale, scale);
-      dstContext.drawImage(canvas, 0, 0);
-      console.timeEnd("imshow");
+    }
+  }
+
+  function overlayData() {
+    if (dataL5 && dataL6) {
+      var data = [];
+      for (var i = 0; i < dataL5.length; i++) {
+        data.push(dataL5[i] + dataL6[i]);
+      }
+      const [min, max] = d3.extent(data);
+      for (var i = 0; i < data.length; i++) {
+        data[i] = (data[i] - min) / (max - min);
+      }
+      setDataOverlay(data);
     }
   }
 
   async function fetchData() {
+    function processData(raw) {
+      var data = [];
+      for (var i = 0; i < dataH; i++) {
+        for (var j = dataW; j > 0; j--) {
+          data.push(raw[i * dataW + j - 1]);
+        }
+      }
+      // Normalize data on fetch
+      const [min, max] = d3.extent(data);
+      for (var i = 0; i < data.length; i++) {
+        data[i] = (data[i] - min) / (max - min);
+      }
+      return data
+    }
     fetch(`L5Cells.TIF`).then((res) =>
       res.arrayBuffer().then(async function (arr) {
         var tif = tiff.decode(arr);
-        var data = [];
-        for (var i = 0; i < 2048; i++) {
-          data.push([]);
-          for (var j = 2048; j > 0; j--) {
-            data[i].push(tif[0].data[i * 2048 + j - 1]);
-          }
-        }
-        imshow(data, 1, d3.interpolateRgb("#ffffff", colorL5), canvasRefL5, 1.0, thresholdL5);
+        var data = processData(tif[0].data);
         setDataL5(data);
       })
     )
     fetch(`L6Cells.TIF`).then((res) =>
       res.arrayBuffer().then(function (arr) {
         var tif = tiff.decode(arr);
-        var data = [];
-        for (var i = 0; i < 2048; i++) {
-          data.push([]);
-          for (var j = 2048; j > 0; j--) {
-            data[i].push(tif[0].data[i * 2048 + j - 1]);
-          }
-        }
-        imshow(data, 1, d3.interpolateRgb("#ffffff", colorL6), canvasRefL6, 1.0, thresholdL6);
+        var data = processData(tif[0].data);
         setDataL6(data);
       })
     )
@@ -290,61 +366,6 @@ function App() {
     panZoomL5.pan(1000, 1000);
   }
 
-  function renderOverlay(colorL5, colorL6, colorOverlay) {
-    if (dataL5 && dataL6) {
-      console.time("renderoverlay");
-      let scale = 1.0;
-      if (overlayRendered) {
-        scale = 1.0;
-      }
-      const flatL5 = [].concat.apply([], dataL5);
-      const flatL6 = [].concat.apply([], dataL6);
-
-      // Color Scale & Min-Max normalization
-      const [minL5, maxL5] = d3.extent(flatL5);
-      const normalizeL5 = d => ((d - minL5) / (maxL5 - minL5));
-      const colorScaleL5 = d => colorL5(normalizeL5(d));
-      const [minL6, maxL6] = d3.extent(flatL6);
-      const normalizeL6 = d => ((d - minL6) / (maxL6 - minL6));
-      const colorScaleL6 = d => colorL6(normalizeL6(d));
-      // Shape of input array
-      const shape = { x: dataL5[0].length, y: dataL5.length };
-
-      // Set up canvas element
-      const canvas = hiddenRef.current;
-      const context = canvas.getContext("2d");
-      canvas.style.width = `${shape.x}px`
-      canvas.style.height = `${shape.y}px`;
-      canvas.style.imageRendering = "pixelated";
-      console.log(thresholdL5, thresholdL6);
-      // Draw pixels to the canvas
-      const imageData = context.createImageData(shape.x, shape.y);
-      flatL5.forEach((d, i) => {
-        let color = { r: 255, g: 255, b: 255 };
-        if (normalizeL5(d) > thresholdL5) {
-          if (normalizeL6(flatL6[i]) > thresholdL6) {
-            color = d3.color(colorOverlay((normalizeL5(d) + normalizeL6(flatL6[i])) / 2));
-          } else {
-            color = d3.color(colorScaleL5(d));
-          }
-        } else if (normalizeL6(flatL6[i]) > thresholdL6) {
-          color = d3.color(colorScaleL6(flatL6[i]));
-        }
-        imageData.data[i * 4] = color.r;
-        imageData.data[i * 4 + 1] = color.g;
-        imageData.data[i * 4 + 2] = color.b;
-        imageData.data[i * 4 + 3] = 255;
-      });
-      context.putImageData(imageData, 0, 0);
-      var dstContext = canvasRefOverlay.current.getContext("2d");
-      dstContext.scale(scale, scale);
-      dstContext.drawImage(canvas, 0, 0);
-
-      setOverlayRendered(true);
-      console.timeEnd("renderoverlay");
-    }
-  }
-
   return (
     <div
       tabIndex={0}
@@ -360,7 +381,7 @@ function App() {
           <div className="slider-container">
             <Slider 
               defaultValue={thresholdL5} 
-              step={0.05}
+              step={0.01}
               min={0.0}
               max={1.0}
               aria-label="Default" 
@@ -372,7 +393,7 @@ function App() {
           <div className="slider-container">
             <Slider 
               defaultValue={thresholdL6} 
-              step={0.05}
+              step={0.01}
               min={0.0}
               max={1.0}
               aria-label="Default" 
