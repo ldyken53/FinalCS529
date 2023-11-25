@@ -5,10 +5,12 @@ import ColorPicker from './ColorPicker';
 import GradientBar from './GradientBar';
 
 import * as d3 from 'd3';
-import * as tiff from 'tiff'
+import * as tiff from 'tiff';
+import pointInPolygon from 'point-in-polygon';
 
-import Panzoom from '@panzoom/panzoom'
+import Panzoom from '@panzoom/panzoom';
 import Slider from '@mui/material/Slider';
+import { Button, ToggleButtonGroup } from '@mui/joy';
 
 function App() {
   const dataW = 2048;
@@ -50,6 +52,12 @@ function App() {
   const [showColorPickerL5, setShowColorPickerL5] = useState(false);
   const [showColorPickerL6, setShowColorPickerL6] = useState(false);
   const [showColorPickerOverlay, setShowColorPickerOverlay] = useState(false);
+  const [hidePolygon, setHidePolygon] = useState('neither');
+  useEffect(() => {
+    imShowL5();
+    imShowL6();
+    imShowOverlay();
+  }, [hidePolygon]);
 
   const toggleColorPickerL5 = () => setShowColorPickerL5(!showColorPickerL5);
   const toggleColorPickerL6 = () => setShowColorPickerL6(!showColorPickerL6);
@@ -88,6 +96,19 @@ function App() {
   useEffect(() => {
     colorOverlayData();
   }, [dataOverlay]);
+
+  const [polyPoints, setPolyPoints] = useState([]);
+  useEffect(() => {
+    canvasRefL5.current.addEventListener('dblclick', addPolyPointL5);
+    canvasRefL6.current.addEventListener('dblclick', addPolyPointL6);
+    canvasRefOverlay.current.addEventListener('dblclick', addPolyPointOverlay);
+
+    return () => {
+      canvasRefL5.current.removeEventListener('dblclick', addPolyPointL5);
+      canvasRefL6.current.removeEventListener('dblclick', addPolyPointL6);
+      canvasRefOverlay.current.removeEventListener('dblclick', addPolyPointOverlay);
+    }
+  }, [polyPoints]);
 
   const [hue, setHue] = useState(0); // The base hue for the color
   const [saturation, setSaturation] = useState(100);
@@ -131,6 +152,16 @@ function App() {
   var hiddenRef = useRef(null);
   var dataFetched = false;
 
+  function addPolyPointL5 (event) {
+    addPolyPoint(canvasRefL5.current, event);
+  }
+  function addPolyPointL6 (event) {
+    addPolyPoint(canvasRefL6.current, event);
+  }
+  function addPolyPointOverlay (event) {
+    addPolyPoint(canvasRefOverlay.current, event);
+  }
+
   function colorL5Data() {
     if (dataL5) {
       var colormap = d3.interpolateRgb("#ffffff", colorL5);
@@ -157,6 +188,12 @@ function App() {
     const imageData = context.createImageData(dataW, dataH);
     for (var i = 0; i < data.length; i++) {
       let color = data[i] > threshold ? colorData[i] : {r: 255, g: 255, b: 255};
+      if (hidePolygon != 'neither') {
+        var inside = pointInPolygon([(i % dataW) / dataW, (i / dataW) / dataH], polyPoints);
+        if ((inside && hidePolygon == 'inside') || (!inside && hidePolygon == 'outside')) {
+          color = {r: 255, g: 255, b: 255};
+        }
+      }
       imageData.data[i * 4] = color.r;
       imageData.data[i * 4 + 1] = color.g;
       imageData.data[i * 4 + 2] = color.b;
@@ -169,10 +206,9 @@ function App() {
     if (colorDataL5) {
       const canvas = canvasRefL5.current;
       const context = canvas.getContext("2d");
-      console.time("foreach");
+      console.time("foreachL5");
       const imageData = makeImageData(dataL5, colorDataL5, context, thresholdL5);
-      console.timeEnd("foreach");
-      console.log("reshow L5");
+      console.timeEnd("foreachL5");
       context.putImageData(imageData, 0, 0);
     }
   }
@@ -181,10 +217,9 @@ function App() {
     if (colorDataL6) {
       const canvas = canvasRefL6.current;
       const context = canvas.getContext("2d");
-      console.time("foreach");
+      console.time("foreachL6");
       const imageData = makeImageData(dataL6, colorDataL6, context, thresholdL6);
-      console.timeEnd("foreach");
-      console.log("reshow L6");
+      console.timeEnd("foreachL6");
       context.putImageData(imageData, 0, 0);
     }
   }
@@ -206,6 +241,12 @@ function App() {
         } else if (dataL6[i] > thresholdL6) {
           color = colorDataL6[i];
         }
+        if (hidePolygon != 'neither') {
+          var inside = pointInPolygon([(i % dataW) / dataW, (i / dataW) / dataH], polyPoints);
+          if ((inside && hidePolygon == 'inside') || (!inside && hidePolygon == 'outside')) {
+            color = {r: 255, g: 255, b: 255};
+          }
+        }
         imageData.data[i * 4] = color.r;
         imageData.data[i * 4 + 1] = color.g;
         imageData.data[i * 4 + 2] = color.b;
@@ -214,7 +255,18 @@ function App() {
       console.timeEnd("foreach");
       console.log("reshow overlay");
       context.putImageData(imageData, 0, 0);
+      for (var i = 0; i < polyPoints.length; i+=2) {
+        drawPolyPoint(polyPoints[i], polyPoints[i + 1]);
+      }
     }
+  }
+
+  function addPolyPoint(canvas, event) {
+    const rect = canvas.getBoundingClientRect();
+    const x = (event.clientX - rect.left) / rect.width;
+    const y = (event.clientY - rect.top) / rect.height;
+    drawPolyPoint(x, y);
+    setPolyPoints([...polyPoints, x, y]);
   }
 
   function overlayData() {
@@ -263,12 +315,39 @@ function App() {
   }
 
   useEffect(() => {
-    setControls();
     if (!dataFetched) {
+      setControls();
       fetchData();
     }
     dataFetched = true;
   }, []);
+
+  function drawPolyPoint(x, y) {
+    var ctx = canvasRefL5.current.getContext("2d");
+    ctx.fillStyle = 'black';
+    ctx.strokeStyle = 'white';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(x * canvasRefL5.current.width, y * canvasRefL5.current.height, 5, 0, 2 * Math.PI);
+    ctx.fill();
+    ctx.stroke();
+    ctx = canvasRefL6.current.getContext("2d");
+    ctx.fillStyle = 'black';
+    ctx.strokeStyle = 'white';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(x * canvasRefL6.current.width, y * canvasRefL6.current.height, 5, 0, 2 * Math.PI);
+    ctx.fill();
+    ctx.stroke();
+    ctx = canvasRefOverlay.current.getContext("2d");
+    ctx.fillStyle = 'black';
+    ctx.strokeStyle = 'white';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(x * canvasRefOverlay.current.width, y * canvasRefOverlay.current.height, 5, 0, 2 * Math.PI);
+    ctx.fill();
+    ctx.stroke();
+  }
 
   function setControls() {
     const panZoomL5 = Panzoom(canvasRefL5.current, {
@@ -294,7 +373,6 @@ function App() {
       startX: -750,
       startY: -650
     });
-    panZoomL6.pan(0, 0)
     panZoomL6.zoom(0.25, {
       animate: true
     });
@@ -308,7 +386,6 @@ function App() {
       startX: -750,
       startY: -650
     });
-    panZoomOverlay.pan(0, 0);
     panZoomOverlay.zoom(0.25, {
       animate: true
     });
@@ -362,8 +439,6 @@ function App() {
         panZoomOverlay.zoomOut({ animate: false });
       }
     });
-
-    panZoomL5.pan(1000, 1000);
   }
 
   return (
@@ -371,10 +446,20 @@ function App() {
       tabIndex={0}
       className="App" style={{ 'height': '100vh', 'width': '100vw' }}
     >
+    <ToggleButtonGroup
+      value={hidePolygon}
+      onChange={(event, newValue) => {
+        setHidePolygon(newValue);
+      }}
+    >
+      <Button value="inside">Hide Inside of Polygon</Button>
+      <Button value="outside">Hide Outside of Polygon</Button>
+      <Button value="neither">Neither</Button>
+    </ToggleButtonGroup>
       <div className="header-container" >
         <h1>{"Visualization of Cortical Cell Expressiveness"}</h1>
       </div>
-      <div>{"Click and Drag to Pan, Scroll to Zoom"}</div>
+      <div>{"Click and Drag to Pan, Scroll to Zoom, Double Click to Select Polygon Points"}</div>
       <div className='sliders-container'>
         <div className="slider-section">
           <div className="slider-label">L5 Threshold</div>
