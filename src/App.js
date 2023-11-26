@@ -547,13 +547,13 @@ function App() {
         </div>
       </div>
       <div style={{ 'display': 'flex', 'flex-direction': 'row', 'justify-content': 'center' }}>
-        <div>
+        <div style={{'border': '5px solid #f0f0f0'}}>
           <canvas width={2048} height={2048} ref={canvasRefL5} />
         </div>
-        <div>
+        <div style={{'border': '5px solid #f0f0f0'}}>
           <canvas width={2048} height={2048} ref={canvasRefL6} />
         </div>
-        <div>
+        <div style={{'border': '5px solid #f0f0f0'}}>
           <canvas width={2048} height={2048} ref={canvasRefOverlay} />
         </div>
         <canvas hidden={true} width={2048} height={2048} ref={hiddenRef} />
