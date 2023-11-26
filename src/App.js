@@ -575,6 +575,7 @@ function App() {
                   sliderPosition={sliderPositionL5}
                   onSliderChange={handleSliderChangeL5}
                   onFinishChange={handleSliderFinishL5}
+                  topic={"l5"}
                 />
 
                 <img
@@ -602,6 +603,7 @@ function App() {
                   sliderPosition={sliderPositionL6}
                   onSliderChange={handleSliderChangeL6}
                   onFinishChange={handleSliderFinishL6}
+                  topic={"l6"}
                 />
 
                 <img
@@ -628,6 +630,7 @@ function App() {
                   sliderPosition={sliderPositionOverlay}
                   onSliderChange={handleSliderChangeOverlay}
                   onFinishChange={handleSliderFinishOverlay}
+                  topic={"overlay"}
                 />
 
                 <img
