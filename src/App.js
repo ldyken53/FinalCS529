@@ -141,6 +141,7 @@ function App() {
 
   // Function to handle slider position change for L6
   const handleSliderChangeL6 = (newPosition) => {
+    //console.log("Slider Position:", newPosition);
     setSliderPositionL6(newPosition);
     // Additional logic to convert newPosition to a color for L6, if needed
   };
@@ -202,9 +203,13 @@ function App() {
   function colorL5Data() {
     console.time('color');
     if (dataL5) {
-      var colormap = d3.interpolateRgb(
-        d3.interpolateRgb("#ffffff", colorL5)(colormapBottomL5), d3.interpolateRgb("#ffffff", colorL5)(colormapTopL5)
-      );
+      // Assume sliderPositionL5 is between 0 and 100
+      var colorAtSlider = d3.interpolateRgb("#ffffff", colorL5)(sliderPositionL5 / 100);
+  
+      var colormap = d3.scaleLinear()
+                       .domain([0, 1])
+                       .range(["#ffffff", colorAtSlider]);
+  
       setColorDataL5(dataL5.map(value => d3.color(colormap(value))));
     }
     console.timeEnd('color');
@@ -212,18 +217,26 @@ function App() {
 
   function colorL6Data() {
     if (dataL6) {
-      var colormap = d3.interpolateRgb(
-        d3.interpolateRgb("#ffffff", colorL5)(colormapBottomL6), d3.interpolateRgb("#ffffff", colorL6)(colormapTopL6)
-      );
+      // Assuming sliderPositionL6 is between 0 and 100
+      var colorAtSlider = d3.interpolateRgb("#ffffff", colorL6)(sliderPositionL6 / 100);
+  
+      var colormap = d3.scaleLinear()
+                       .domain([0, 1])
+                       .range(["#ffffff", colorAtSlider]);
+  
       setColorDataL6(dataL6.map(value => d3.color(colormap(value))));
     }
   }
 
   function colorOverlayData() {
-    if (dataL6 && dataL5) {
-      var colormap = d3.interpolateRgb(
-        d3.interpolateRgb("#ffffff", colorL5)(colormapBottomOverlay), d3.interpolateRgb("#ffffff", colorOverlay)(colormapTopOverlay)
-      );
+    if (dataL5 && dataL6) {
+      // Assuming sliderPositionOverlay is between 0 and 100
+      var colorAtSlider = d3.interpolateRgb("#ffffff", colorOverlay)(sliderPositionOverlay / 100);
+  
+      var colormap = d3.scaleLinear()
+                       .domain([0, 1])
+                       .range(["#ffffff", colorAtSlider]);
+  
       setColorDataOverlay(dataOverlay.map(value => d3.color(colormap(value))));
     }
   }
