@@ -206,11 +206,14 @@ function App() {
       // Assume sliderPositionL5 is between 0 and 100
       var colorAtSlider = d3.interpolateRgb("#ffffff", colorL5)(sliderPositionL5 / 100);
   
-      var colormap = d3.scaleLinear()
-                       .domain([0, 1])
-                       .range(["#ffffff", colorAtSlider]);
-  
-      setColorDataL5(dataL5.map(value => d3.color(colormap(value))));
+      var bt = d3.color("#ffffff");
+      var tp = d3.color(colorAtSlider);
+      const colorVal = (prop, value) =>
+        Math.round(bt[prop] * (1 - value) + tp[prop] * value);
+
+      setColorDataL5(dataL5.map((value) => {
+        return {'r': colorVal('r', value), 'g': colorVal('g', value), 'b': colorVal('b', value)}
+      }));
     }
     console.timeEnd('color');
   }
@@ -220,11 +223,14 @@ function App() {
       // Assuming sliderPositionL6 is between 0 and 100
       var colorAtSlider = d3.interpolateRgb("#ffffff", colorL6)(sliderPositionL6 / 100);
   
-      var colormap = d3.scaleLinear()
-                       .domain([0, 1])
-                       .range(["#ffffff", colorAtSlider]);
-  
-      setColorDataL6(dataL6.map(value => d3.color(colormap(value))));
+      var bt = d3.color("#ffffff");
+      var tp = d3.color(colorAtSlider);
+      const colorVal = (prop, value) =>
+        Math.round(bt[prop] * (1 - value) + tp[prop] * value);
+
+      setColorDataL6(dataL6.map((value) => {
+        return {'r': colorVal('r', value), 'g': colorVal('g', value), 'b': colorVal('b', value)}
+      }));
     }
   }
 
@@ -233,11 +239,14 @@ function App() {
       // Assuming sliderPositionOverlay is between 0 and 100
       var colorAtSlider = d3.interpolateRgb("#ffffff", colorOverlay)(sliderPositionOverlay / 100);
   
-      var colormap = d3.scaleLinear()
-                       .domain([0, 1])
-                       .range(["#ffffff", colorAtSlider]);
-  
-      setColorDataOverlay(dataOverlay.map(value => d3.color(colormap(value))));
+      var bt = d3.color("#ffffff");
+      var tp = d3.color(colorAtSlider);
+      const colorVal = (prop, value) =>
+        Math.round(bt[prop] * (1 - value) + tp[prop] * value);
+
+      setColorDataOverlay(dataOverlay.map((value) => {
+        return {'r': colorVal('r', value), 'g': colorVal('g', value), 'b': colorVal('b', value)}
+      }));
     }
   }
 
