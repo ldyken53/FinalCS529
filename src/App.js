@@ -528,6 +528,12 @@ function App() {
     elemOverlay.click();
   }
 
+    // TODO: load images by file (not necessary now cause only one data file)
+    const loadImages = (e) => {
+      e.preventDefault();
+      alert("Loading file data disabled for demo!");
+    }
+
   return (
     <div
       tabIndex={0}
@@ -558,7 +564,7 @@ function App() {
       </ToggleButtonGroup>
       </div>
       <div style= {{'justifyContent': 'right'}}>
-        <Button style={{'margin-right': '5px'}}>Load Data</Button>
+        <Button onClick={loadImages} style={{'margin-right': '5px'}}>Load Data</Button>
         <Button onClick={saveImages} style={{'margin-right': '5px'}}>Save Images</Button>
       </div>
     </div>
