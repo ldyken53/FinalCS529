@@ -71,6 +71,10 @@ function App() {
     imShowL6();
     imShowOverlay();
   }, [hidePolygon]);
+  const [overlayType, setOverlayType] = useState('color');
+  useEffect(() => {
+    imShowOverlay();
+  }, [overlayType]);
 
   const toggleColorPickerL5 = () => setShowColorPickerL5(!showColorPickerL5);
   const toggleColorPickerL6 = () => setShowColorPickerL6(!showColorPickerL6);
@@ -82,22 +86,6 @@ function App() {
   const [sliderPositionL5Right, setSliderPositionL5Right] = useState(100); // State for L5 slider position
   const [sliderPositionL6Right, setSliderPositionL6Right] = useState(100); // State for L6 slider position
   const [sliderPositionOverlayRight, setSliderPositionOverlayRight] = useState(100); // State for L6 slider position
-
-  const [colormapBottomL5, setColormapBottomL5] = useState(0.0);
-  const [colormapTopL5, setColormapTopL5] = useState(1.0);
-  const [colormapBottomL6, setColormapBottomL6] = useState(0.0);
-  const [colormapTopL6, setColormapTopL6] = useState(1.0);
-  const [colormapBottomOverlay, setColormapBottomOverlay] = useState(0.0);
-  const [colormapTopOverlay, setColormapTopOverlay] = useState(1.0);
-  useEffect(() => {
-    colorL5Data();
-  }, [colormapBottomL5, colormapTopL5])
-  useEffect(() => {
-    colorL6Data();
-  }, [colormapBottomL6, colormapTopL6])
-  useEffect(() => {
-    colorOverlayData();
-  }, [colormapBottomOverlay, colormapTopOverlay])
 
   const [colorDataL5, setColorDataL5] = useState();
   const [colorDataL6, setColorDataL6] = useState();
@@ -284,7 +272,15 @@ function App() {
         let color = { r: 255, g: 255, b: 255 };
         if (dataL5[i] > thresholdL5) {
           if (dataL6[i] > thresholdL6) {
-            color = colorDataOverlay[i];
+            if (overlayType == 'color') {
+              color = colorDataOverlay[i];
+            } else {
+              color = {
+                r: 0.5 * (colorDataL5[i].r + colorDataL6[i].r),
+                g: 0.5 * (colorDataL5[i].g + colorDataL6[i].g),
+                b: 0.5 * (colorDataL5[i].b + colorDataL6[i].b),
+              };
+            }
           } else {
             color = colorDataL5[i];
           }
@@ -301,7 +297,7 @@ function App() {
         imageData.data[i * 4 + 1] = color.g;
         imageData.data[i * 4 + 2] = color.b;
         imageData.data[i * 4 + 3] = 255;
-      }  
+      }
       console.timeEnd("foreach");
       console.log("reshow overlay");
       context.putImageData(imageData, 0, 0);
@@ -537,6 +533,17 @@ function App() {
         <Button value="inside">Hide Inside of Polygon</Button>
         <Button value="outside">Hide Outside of Polygon</Button>
         <Button value="neither">Neither</Button>
+      </ToggleButtonGroup>
+      </div>
+      <div style={{'justifyContent': 'left'}}>
+      <ToggleButtonGroup
+        value={overlayType}
+        onChange={(event, newValue) => {
+          setOverlayType(newValue);
+        }}
+      >
+        <Button value="color">Overlay Data with Overlap Color</Button>
+        <Button value="opacity">Overlay Data with Opacity</Button>
       </ToggleButtonGroup>
       </div>
       <div style= {{'justifyContent': 'right'}}>
