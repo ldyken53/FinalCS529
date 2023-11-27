@@ -62,6 +62,12 @@ function App() {
     canvasRefOverlay.current.style.cssText += `filter:contrast(${contrastOverlay});`;
   }, [contrastOverlay]);
 
+  const [opacityL5, setOpacityL5] = useState(0.5);
+  const [opacityL6, setOpacityL6] = useState(0.5);
+  useEffect(() => {
+    imShowOverlay();
+  }, [opacityL5, opacityL6]);
+
   const [showColorPickerL5, setShowColorPickerL5] = useState(false);
   const [showColorPickerL6, setShowColorPickerL6] = useState(false);
   const [showColorPickerOverlay, setShowColorPickerOverlay] = useState(false);
@@ -269,34 +275,39 @@ function App() {
       console.time("foreach");
       const imageData = context.createImageData(dataW, dataH);
       for (var i = 0; i < dataOverlay.length; i++) {
-        let color = { r: 255, g: 255, b: 255 };
+        let color = { r: 255, g: 255, b: 255};
+        let a = 1;
         if (dataL5[i] > thresholdL5) {
           if (dataL6[i] > thresholdL6) {
             if (overlayType == 'color') {
               color = colorDataOverlay[i];
             } else {
+              a = opacityL5 + opacityL6 * (1 - opacityL5);
               color = {
-                r: 0.5 * (colorDataL5[i].r + colorDataL6[i].r),
-                g: 0.5 * (colorDataL5[i].g + colorDataL6[i].g),
-                b: 0.5 * (colorDataL5[i].b + colorDataL6[i].b),
+                r: (opacityL5 * colorDataL5[i].r + opacityL6 * colorDataL6[i].r * (1 - opacityL5)) / a,
+                g: (opacityL5 * colorDataL5[i].g + opacityL6 * colorDataL6[i].g * (1 - opacityL5)) / a,
+                b: (opacityL5 * colorDataL5[i].b + opacityL6 * colorDataL6[i].b * (1 - opacityL5)) / a,
               };
             }
           } else {
             color = colorDataL5[i];
+            a = opacityL5;
           }
         } else if (dataL6[i] > thresholdL6) {
           color = colorDataL6[i];
+          a = opacityL6;
         }
         if (hidePolygon != 'neither') {
           var inside = pointInPolygon([(i % dataW) / dataW, (i / dataW) / dataH], polyPoints);
           if ((inside && hidePolygon == 'inside') || (!inside && hidePolygon == 'outside')) {
             color = {r: 255, g: 255, b: 255};
+            a = 1;
           }
         }
         imageData.data[i * 4] = color.r;
         imageData.data[i * 4 + 1] = color.g;
         imageData.data[i * 4 + 2] = color.b;
-        imageData.data[i * 4 + 3] = 255;
+        imageData.data[i * 4 + 3] = a * 255;
       }
       console.timeEnd("foreach");
       console.log("reshow overlay");
@@ -579,6 +590,34 @@ function App() {
               aria-label="Default" 
               valueLabelDisplay="auto"  
               onChangeCommitted={(event, newValue) => {setThresholdL6(newValue)}}
+            />          
+          </div>
+        </div>
+      </div>
+      <div className='sliders-container'>
+        <div className="slider-section">
+          <div className="slider-label">L5 Opacity</div>
+          <div className="slider-container">
+            <Slider 
+              defaultValue={opacityL5} 
+              step={0.05}
+              min={0.0}
+              max={1.0}
+              aria-label="Default" 
+              valueLabelDisplay="auto" 
+              onChangeCommitted={(event, newValue) => {setOpacityL5(newValue)}}
+            />
+          </div>
+          <div className="slider-label">L6 Opacity</div>
+          <div className="slider-container">
+            <Slider 
+              defaultValue={opacityL6} 
+              step={0.05}
+              min={0.0}
+              max={1.0}
+              aria-label="Default" 
+              valueLabelDisplay="auto"  
+              onChangeCommitted={(event, newValue) => {setOpacityL6(newValue)}}
             />          
           </div>
         </div>
