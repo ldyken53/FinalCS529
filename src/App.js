@@ -40,14 +40,28 @@ function App() {
 
   const [thresholdL5, setThresholdL5] = useState(0.2);
   const [thresholdL6, setThresholdL6] = useState(0.2);
+  const [thresholdL5Inside, setThresholdL5Inside] = useState(0.2);
+  const [thresholdL6Inside, setThresholdL6Inside] = useState(0.2);
+  const [thresholdL5Outside, setThresholdL5Outside] = useState(0.2);
+  const [thresholdL6Outside, setThresholdL6Outside] = useState(0.2);
   useEffect(() => {
     imShowL5();
     imShowOverlay();
-  }, [thresholdL5]);
+  }, [thresholdL5, thresholdL5Inside, thresholdL5Outside]);
   useEffect(() => {
     imShowL6();
     imShowOverlay();
-  }, [thresholdL6]);
+  }, [thresholdL6, thresholdL6Inside, thresholdL6Outside]);
+  const polyTypeToThresholdL5 = {
+    'inside': thresholdL5Inside,
+    'outside': thresholdL5Outside,
+    'neither': thresholdL5
+  };
+  const polyTypeToThresholdL6 = {
+    'inside': thresholdL6Inside,
+    'outside': thresholdL6Outside,
+    'neither': thresholdL6
+  };
 
   const [contrastL5, setContrastL5] = useState(1.0);
   const [contrastL6, setContrastL6] = useState(1.0);
@@ -64,19 +78,33 @@ function App() {
 
   const [opacityL5, setOpacityL5] = useState(0.5);
   const [opacityL6, setOpacityL6] = useState(0.5);
+  const [opacityL5Inside, setOpacityL5Inside] = useState(0.5);
+  const [opacityL6Inside, setOpacityL6Inside] = useState(0.5);
+  const [opacityL5Outside, setOpacityL5Outside] = useState(0.5);
+  const [opacityL6Outside, setOpacityL6Outside] = useState(0.5);
   useEffect(() => {
     imShowOverlay();
-  }, [opacityL5, opacityL6]);
+  }, [opacityL5, opacityL6, opacityL5Inside, opacityL5Outside, opacityL6Inside, opacityL6Outside]);
 
   const [showColorPickerL5, setShowColorPickerL5] = useState(false);
   const [showColorPickerL6, setShowColorPickerL6] = useState(false);
   const [showColorPickerOverlay, setShowColorPickerOverlay] = useState(false);
-  const [hidePolygon, setHidePolygon] = useState('neither');
+
+  const [toggleInsidePolySliders, setToggleInsidePolySliders] = useState(false);
+  const [toggleOutsidePolySliders, setToggleOutsidePolySliders] = useState(false);
+  const [toggleNeitherPolySliders, setToggleNeitherPolySliders] = useState(true);
+  const polyTypeToToggle = {
+    'neither': () => {setToggleInsidePolySliders(false); setToggleOutsidePolySliders(false); setToggleNeitherPolySliders(true)},
+    'outside': () => {setToggleInsidePolySliders(false); setToggleOutsidePolySliders(true); setToggleNeitherPolySliders(false)},
+    'inside': () => {setToggleInsidePolySliders(true); setToggleOutsidePolySliders(false); setToggleNeitherPolySliders(false)},
+  }
+  const [polygonType, setPolygonType] = useState('neither');
   useEffect(() => {
+    polyTypeToToggle[polygonType]();
     imShowL5();
     imShowL6();
     imShowOverlay();
-  }, [hidePolygon]);
+  }, [polygonType]);
   const [overlayType, setOverlayType] = useState('color');
   useEffect(() => {
     imShowOverlay();
@@ -228,15 +256,19 @@ function App() {
   }
 
 
-  function makeImageData(data, colorData, context, threshold) {
+  function makeImageData(data, colorData, context, polyTypeToThreshold) {
     const imageData = context.createImageData(dataW, dataH);
     for (var i = 0; i < data.length; i++) {
-      let color = data[i] > threshold ? colorData[i] : {r: 255, g: 255, b: 255};
-      if (hidePolygon != 'neither') {
+      let color = {r: 255, g: 255, b: 255};
+      if (polygonType != 'neither') {
         var inside = pointInPolygon([(i % dataW) / dataW, (i / dataW) / dataH], polyPoints);
-        if ((inside && hidePolygon == 'inside') || (!inside && hidePolygon == 'outside')) {
-          color = {r: 255, g: 255, b: 255};
+        if (inside) {
+          color = data[i] > polyTypeToThreshold['inside'] ? colorData[i] : {r: 255, g: 255, b: 255};
+        } else {
+          color = data[i] > polyTypeToThreshold['outside'] ? colorData[i] : {r: 255, g: 255, b: 255};
         }
+      } else {
+        color = data[i] > polyTypeToThreshold['neither'] ? colorData[i] : {r: 255, g: 255, b: 255};
       }
       imageData.data[i * 4] = color.r;
       imageData.data[i * 4 + 1] = color.g;
@@ -251,7 +283,7 @@ function App() {
       const canvas = canvasRefL5.current;
       const context = canvas.getContext("2d");
       console.time("foreachL5");
-      const imageData = makeImageData(dataL5, colorDataL5, context, thresholdL5);
+      const imageData = makeImageData(dataL5, colorDataL5, context, polyTypeToThresholdL5);
       console.timeEnd("foreachL5");
       context.putImageData(imageData, 0, 0);
     }
@@ -262,7 +294,7 @@ function App() {
       const canvas = canvasRefL6.current;
       const context = canvas.getContext("2d");
       console.time("foreachL6");
-      const imageData = makeImageData(dataL6, colorDataL6, context, thresholdL6);
+      const imageData = makeImageData(dataL6, colorDataL6, context, polyTypeToThresholdL6);
       console.timeEnd("foreachL6");
       context.putImageData(imageData, 0, 0);
     }
@@ -275,34 +307,46 @@ function App() {
       console.time("foreach");
       const imageData = context.createImageData(dataW, dataH);
       for (var i = 0; i < dataOverlay.length; i++) {
+        var threshL5 = thresholdL5;
+        var threshL6 = thresholdL6;
+        var opacL5 = opacityL5;
+        var opacL6 = opacityL6;
+        if (polygonType != 'neither') {
+          var inside = pointInPolygon([(i % dataW) / dataW, (i / dataW) / dataH], polyPoints);
+          if (inside) {
+            threshL5 = thresholdL5Inside;
+            threshL6 = thresholdL6Inside;
+            opacL5 = opacityL5Inside;
+            opacL6 = opacityL6Inside;
+          } else {
+            threshL5 = thresholdL5Outside;
+            threshL6 = thresholdL6Outside;
+            opacL5 = opacityL5Outside;
+            opacL6 = opacityL6Outside;
+          }
+        }
         let color = { r: 255, g: 255, b: 255};
         let a = 1;
-        if (dataL5[i] > thresholdL5) {
-          if (dataL6[i] > thresholdL6) {
+        if (dataL5[i] > threshL5) {
+          if (dataL6[i] > threshL6) {
             if (overlayType == 'color') {
               color = colorDataOverlay[i];
+              a = opacL5 + opacL6 * (1 - opacL5);
             } else {
-              a = opacityL5 + opacityL6 * (1 - opacityL5);
+              a = opacL5 + opacL6 * (1 - opacL5);
               color = {
-                r: (opacityL5 * colorDataL5[i].r + opacityL6 * colorDataL6[i].r * (1 - opacityL5)) / a,
-                g: (opacityL5 * colorDataL5[i].g + opacityL6 * colorDataL6[i].g * (1 - opacityL5)) / a,
-                b: (opacityL5 * colorDataL5[i].b + opacityL6 * colorDataL6[i].b * (1 - opacityL5)) / a,
+                r: (opacL5 * colorDataL5[i].r + opacL6 * colorDataL6[i].r * (1 - opacL5)) / a,
+                g: (opacL5 * colorDataL5[i].g + opacL6 * colorDataL6[i].g * (1 - opacL5)) / a,
+                b: (opacL5 * colorDataL5[i].b + opacL6 * colorDataL6[i].b * (1 - opacL5)) / a,
               };
             }
           } else {
             color = colorDataL5[i];
-            a = opacityL5;
+            a = opacL5;
           }
         } else if (dataL6[i] > thresholdL6) {
           color = colorDataL6[i];
-          a = opacityL6;
-        }
-        if (hidePolygon != 'neither') {
-          var inside = pointInPolygon([(i % dataW) / dataW, (i / dataW) / dataH], polyPoints);
-          if ((inside && hidePolygon == 'inside') || (!inside && hidePolygon == 'outside')) {
-            color = {r: 255, g: 255, b: 255};
-            a = 1;
-          }
+          a = opacL6;
         }
         imageData.data[i * 4] = color.r;
         imageData.data[i * 4 + 1] = color.g;
@@ -542,14 +586,14 @@ function App() {
     <div style={{ 'display': 'flex', 'flex-direction': 'row', 'justifyContent': 'space-between'}}>
       <div style={{'justifyContent': 'left'}}>
       <ToggleButtonGroup
-        value={hidePolygon}
+        value={polygonType}
         onChange={(event, newValue) => {
-          setHidePolygon(newValue);
+          setPolygonType(newValue);
         }}
       >
-        <Button value="inside">Hide Inside of Polygon</Button>
-        <Button value="outside">Hide Outside of Polygon</Button>
-        <Button value="neither">Neither</Button>
+        <Button value="inside">Change Settings Inside Polygon</Button>
+        <Button value="outside">Change Settings Outside Polygon</Button>
+        <Button value="neither">Change Settings Everywhere</Button>
       </ToggleButtonGroup>
       </div>
       <div style={{'justifyContent': 'left'}}>
@@ -572,62 +616,183 @@ function App() {
         <h1>{"Visualization of Cortical Cell Expressiveness"}</h1>
       </div>
       <div>{"Click and Drag to Pan, Scroll to Zoom, Double Click to Select Polygon Points"}</div>
-      <div className='sliders-container'>
-        <div className="slider-section">
-          <div className="slider-label">L5 Threshold</div>
-          <div className="slider-container">
-            <Slider 
-              defaultValue={thresholdL5} 
-              step={0.01}
-              min={0.0}
-              max={1.0}
-              aria-label="Default" 
-              valueLabelDisplay="auto" 
-              onChangeCommitted={(event, newValue) => {setThresholdL5(newValue)}}
-            />
-          </div>
-          <div className="slider-label">L6 Threshold</div>
-          <div className="slider-container">
-            <Slider 
-              defaultValue={thresholdL6} 
-              step={0.01}
-              min={0.0}
-              max={1.0}
-              aria-label="Default" 
-              valueLabelDisplay="auto"  
-              onChangeCommitted={(event, newValue) => {setThresholdL6(newValue)}}
-            />          
-          </div>
-        </div>
-      </div>
-      <div className='sliders-container'>
-        <div className="slider-section">
-          <div className="slider-label">L5 Opacity</div>
-          <div className="slider-container">
-            <Slider 
-              defaultValue={opacityL5} 
-              step={0.05}
-              min={0.0}
-              max={1.0}
-              aria-label="Default" 
-              valueLabelDisplay="auto" 
-              onChangeCommitted={(event, newValue) => {setOpacityL5(newValue)}}
-            />
-          </div>
-          <div className="slider-label">L6 Opacity</div>
-          <div className="slider-container">
-            <Slider 
-              defaultValue={opacityL6} 
-              step={0.05}
-              min={0.0}
-              max={1.0}
-              aria-label="Default" 
-              valueLabelDisplay="auto"  
-              onChangeCommitted={(event, newValue) => {setOpacityL6(newValue)}}
-            />          
+      {toggleNeitherPolySliders && (
+        <div>
+          <div className='sliders-container'>\
+          <div className="slider-section">
+            <div className="slider-label">L5 Threshold</div>
+            <div className="slider-container">
+              <Slider 
+                defaultValue={thresholdL5} 
+                step={0.01}
+                min={0.0}
+                max={1.0}
+                aria-label="Default" 
+                valueLabelDisplay="auto" 
+                onChangeCommitted={(event, newValue) => {setThresholdL5(newValue)}}
+              />
+            </div>
+            <div className="slider-label">L6 Threshold</div>
+            <div className="slider-container">
+              <Slider 
+                defaultValue={thresholdL6} 
+                step={0.01}
+                min={0.0}
+                max={1.0}
+                aria-label="Default" 
+                valueLabelDisplay="auto"  
+                onChangeCommitted={(event, newValue) => {setThresholdL6(newValue)}}
+              />          
+            </div>
           </div>
         </div>
-      </div>
+        <div className='sliders-container'>
+          <div className="slider-section">
+            <div className="slider-label">L5 Opacity in Overlay</div>
+            <div className="slider-container">
+              <Slider 
+                defaultValue={opacityL5} 
+                step={0.05}
+                min={0.0}
+                max={1.0}
+                aria-label="Default" 
+                valueLabelDisplay="auto" 
+                onChangeCommitted={(event, newValue) => {setOpacityL5(newValue)}}
+              />
+            </div>
+            <div className="slider-label">L6 Opacity in Overlay</div>
+            <div className="slider-container">
+              <Slider 
+                defaultValue={opacityL6} 
+                step={0.05}
+                min={0.0}
+                max={1.0}
+                aria-label="Default" 
+                valueLabelDisplay="auto"  
+                onChangeCommitted={(event, newValue) => {setOpacityL6(newValue)}}
+              />          
+            </div>
+          </div>
+        </div>
+      </div>)}
+      {toggleInsidePolySliders && (
+        <div>
+          <div className='sliders-container'>\
+          <div className="slider-section">
+            <div className="slider-label">L5 Threshold (Inside Polygon)</div>
+            <div className="slider-container">
+              <Slider 
+                defaultValue={thresholdL5Inside} 
+                step={0.01}
+                min={0.0}
+                max={1.0}
+                aria-label="Default" 
+                valueLabelDisplay="auto" 
+                onChangeCommitted={(event, newValue) => {setThresholdL5Inside(newValue)}}
+              />
+            </div>
+            <div className="slider-label">L6 Threshold (Inside Polygon)</div>
+            <div className="slider-container">
+              <Slider 
+                defaultValue={thresholdL6Inside} 
+                step={0.01}
+                min={0.0}
+                max={1.0}
+                aria-label="Default" 
+                valueLabelDisplay="auto"  
+                onChangeCommitted={(event, newValue) => {setThresholdL6Inside(newValue)}}
+              />          
+            </div>
+          </div>
+        </div>
+        <div className='sliders-container'>
+          <div className="slider-section">
+            <div className="slider-label">L5 Opacity in Overlay (Inside Polygon)</div>
+            <div className="slider-container">
+              <Slider 
+                defaultValue={opacityL5Inside} 
+                step={0.05}
+                min={0.0}
+                max={1.0}
+                aria-label="Default" 
+                valueLabelDisplay="auto" 
+                onChangeCommitted={(event, newValue) => {setOpacityL5Inside(newValue)}}
+              />
+            </div>
+            <div className="slider-label">L6 Opacity in Overlay (Inside Polygon)</div>
+            <div className="slider-container">
+              <Slider 
+                defaultValue={opacityL6Inside} 
+                step={0.05}
+                min={0.0}
+                max={1.0}
+                aria-label="Default" 
+                valueLabelDisplay="auto"  
+                onChangeCommitted={(event, newValue) => {setOpacityL6Inside(newValue)}}
+              />          
+            </div>
+          </div>
+        </div>
+      </div>)}
+      {toggleOutsidePolySliders && (
+        <div>
+          <div className='sliders-container'>\
+          <div className="slider-section">
+            <div className="slider-label">L5 Threshold (Outside Polygon)</div>
+            <div className="slider-container">
+              <Slider 
+                defaultValue={thresholdL5Outside} 
+                step={0.01}
+                min={0.0}
+                max={1.0}
+                aria-label="Default" 
+                valueLabelDisplay="auto" 
+                onChangeCommitted={(event, newValue) => {setThresholdL5Outside(newValue)}}
+              />
+            </div>
+            <div className="slider-label">L6 Threshold (Outside Polygon)</div>
+            <div className="slider-container">
+              <Slider 
+                defaultValue={thresholdL6Outside} 
+                step={0.01}
+                min={0.0}
+                max={1.0}
+                aria-label="Default" 
+                valueLabelDisplay="auto"  
+                onChangeCommitted={(event, newValue) => {setThresholdL6Outside(newValue)}}
+              />          
+            </div>
+          </div>
+        </div>
+        <div className='sliders-container'>
+          <div className="slider-section">
+            <div className="slider-label">L5 Opacity in Overlay (Outside Polygon)</div>
+            <div className="slider-container">
+              <Slider 
+                defaultValue={opacityL5Outside} 
+                step={0.05}
+                min={0.0}
+                max={1.0}
+                aria-label="Default" 
+                valueLabelDisplay="auto" 
+                onChangeCommitted={(event, newValue) => {setOpacityL5Outside(newValue)}}
+              />
+            </div>
+            <div className="slider-label">L6 Opacity in Overlay (Outside Polygon)</div>
+            <div className="slider-container">
+              <Slider 
+                defaultValue={opacityL6Outside} 
+                step={0.05}
+                min={0.0}
+                max={1.0}
+                aria-label="Default" 
+                valueLabelDisplay="auto"  
+                onChangeCommitted={(event, newValue) => {setOpacityL6Outside(newValue)}}
+              />          
+            </div>
+          </div>
+        </div>
+      </div>)}
       <div className='sliders-container'>
         <div className="slider-section">
           <div className="slider-label">L5 Contrast</div>
