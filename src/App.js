@@ -509,9 +509,9 @@ function App() {
     let urlOverlay = canvasRefOverlay.current.toDataURL();
 
     // create anchors
-    const elemL5 = document.createElement('L5');
-    const elemL6 = document.createElement('L6');
-    const elemOverlay = document.createElement('Overlay');
+    const elemL5 = document.createElement("a");
+    const elemL6 = document.createElement("a");
+    const elemOverlay = document.createElement("a");
 
     // set the href value to the data URLs
     elemL5.href = urlL5;
@@ -519,9 +519,14 @@ function App() {
     elemOverlay.href = urlOverlay;
 
     // name downloaded files
-    elemL5.download = "L5 Image";
-    elemL6.download = "L6 Image";
-    elemOverlay.download = "Overlay Image";
+    elemL5.download = "L5 Image.png";
+    elemL6.download = "L6 Image.png";
+    elemOverlay.download = "Overlay Image.png";
+
+    // click
+    elemL5.click();
+    elemL6.click();
+    elemOverlay.click();
   }
 
   return (
