@@ -49,6 +49,19 @@ function App() {
     imShowOverlay();
   }, [thresholdL6]);
 
+  const [contrastL5, setContrastL5] = useState(1.0);
+  const [contrastL6, setContrastL6] = useState(1.0);
+  const [contrastOverlay, setContrastOverlay] = useState(1.0);
+  useEffect(() => {
+    canvasRefL5.current.style.cssText += `filter:contrast(${contrastL5});`;
+  }, [contrastL5]);
+  useEffect(() => {
+    canvasRefL6.current.style.cssText += `filter:contrast(${contrastL6});`;
+  }, [contrastL6]);
+  useEffect(() => {
+    canvasRefOverlay.current.style.cssText += `filter:contrast(${contrastOverlay});`;
+  }, [contrastOverlay]);
+
   const [showColorPickerL5, setShowColorPickerL5] = useState(false);
   const [showColorPickerL6, setShowColorPickerL6] = useState(false);
   const [showColorPickerOverlay, setShowColorPickerOverlay] = useState(false);
@@ -63,9 +76,9 @@ function App() {
   const toggleColorPickerL6 = () => setShowColorPickerL6(!showColorPickerL6);
   const toggleColorPickerOverlay = () => setShowColorPickerOverlay(!showColorPickerOverlay);
 
-  const [sliderPositionL5, setSliderPositionL5] = useState(50); // State for L5 slider position
-  const [sliderPositionL6, setSliderPositionL6] = useState(50); // State for L6 slider position
-  const [sliderPositionOverlay, setSliderPositionOverlay] = useState(50); // State for L6 slider position
+  const [sliderPositionL5, setSliderPositionL5] = useState(100); // State for L5 slider position
+  const [sliderPositionL6, setSliderPositionL6] = useState(100); // State for L6 slider position
+  const [sliderPositionOverlay, setSliderPositionOverlay] = useState(100); // State for L6 slider position
 
   const [colormapBottomL5, setColormapBottomL5] = useState(0.0);
   const [colormapTopL5, setColormapTopL5] = useState(1.0);
@@ -589,6 +602,46 @@ function App() {
               aria-label="Default" 
               valueLabelDisplay="auto"  
               onChangeCommitted={(event, newValue) => {setThresholdL6(newValue)}}
+            />          
+          </div>
+        </div>
+      </div>
+      <div className='sliders-container'>
+        <div className="slider-section">
+          <div className="slider-label">L5 Contrast</div>
+          <div className="slider-container">
+            <Slider 
+              defaultValue={contrastL5} 
+              step={0.05}
+              min={0.8}
+              max={1.5}
+              aria-label="Default" 
+              valueLabelDisplay="auto" 
+              onChangeCommitted={(event, newValue) => {setContrastL5(newValue)}}
+            />
+          </div>
+          <div className="slider-label">L6 Contrast</div>
+          <div className="slider-container">
+            <Slider 
+              defaultValue={contrastL6} 
+              step={0.05}
+              min={0.8}
+              max={1.5}
+              aria-label="Default" 
+              valueLabelDisplay="auto"  
+              onChangeCommitted={(event, newValue) => {setContrastL6(newValue)}}
+            />          
+          </div>
+          <div className="slider-label">Overlay Contrast</div>
+          <div className="slider-container">
+            <Slider 
+              defaultValue={contrastOverlay} 
+              step={0.05}
+              min={0.8}
+              max={1.5}
+              aria-label="Default" 
+              valueLabelDisplay="auto"  
+              onChangeCommitted={(event, newValue) => {setContrastOverlay(newValue)}}
             />          
           </div>
         </div>
