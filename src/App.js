@@ -499,21 +499,59 @@ function App() {
     });
   }
 
+  // save canvases as PNGs when the Save Images button is selected
+  const saveImages = (e) => {
+    e.preventDefault();
+
+    // convert canvases to data URLs
+    let urlL5 = canvasRefL5.current.toDataURL();
+    let urlL6 = canvasRefL6.current.toDataURL();
+    let urlOverlay = canvasRefOverlay.current.toDataURL();
+
+    // create anchors
+    const elemL5 = document.createElement("a");
+    const elemL6 = document.createElement("a");
+    const elemOverlay = document.createElement("a");
+
+    // set the href value to the data URLs
+    elemL5.href = urlL5;
+    elemL6.href = urlL6;
+    elemOverlay.href = urlOverlay;
+
+    // name downloaded files
+    elemL5.download = "L5 Image.png";
+    elemL6.download = "L6 Image.png";
+    elemOverlay.download = "Overlay Image.png";
+
+    // click
+    elemL5.click();
+    elemL6.click();
+    elemOverlay.click();
+  }
+
   return (
     <div
       tabIndex={0}
       className="App" style={{ 'height': '100vh', 'width': '100vw' }}
     >
-    <ToggleButtonGroup
-      value={hidePolygon}
-      onChange={(event, newValue) => {
-        setHidePolygon(newValue);
-      }}
-    >
-      <Button value="inside">Hide Inside of Polygon</Button>
-      <Button value="outside">Hide Outside of Polygon</Button>
-      <Button value="neither">Neither</Button>
-    </ToggleButtonGroup>
+    <div style={{ 'display': 'flex', 'flex-direction': 'row', 'justifyContent': 'space-between'}}>
+      <div style={{'justifyContent': 'left'}}>
+      <ToggleButtonGroup
+        value={hidePolygon}
+        onChange={(event, newValue) => {
+          setHidePolygon(newValue);
+        }}
+      >
+        <Button value="inside">Hide Inside of Polygon</Button>
+        <Button value="outside">Hide Outside of Polygon</Button>
+        <Button value="neither">Neither</Button>
+      </ToggleButtonGroup>
+      </div>
+      <div style= {{'justifyContent': 'right'}}>
+        <Button style={{'margin-right': '5px'}}>Load Data</Button>
+        <Button onClick={saveImages} style={{'margin-right': '5px'}}>Save Images</Button>
+      </div>
+    </div>
       <div className="header-container" >
         <h1>{"Visualization of Cortical Cell Expressiveness"}</h1>
       </div>
@@ -547,13 +585,13 @@ function App() {
         </div>
       </div>
       <div style={{ 'display': 'flex', 'flex-direction': 'row', 'justify-content': 'center' }}>
-        <div>
+        <div style={{'border': '5px solid #f0f0f0'}}>
           <canvas width={2048} height={2048} ref={canvasRefL5} />
         </div>
-        <div>
+        <div style={{'border': '5px solid #f0f0f0'}}>
           <canvas width={2048} height={2048} ref={canvasRefL6} />
         </div>
-        <div>
+        <div style={{'border': '5px solid #f0f0f0'}}>
           <canvas width={2048} height={2048} ref={canvasRefOverlay} />
         </div>
         <canvas hidden={true} width={2048} height={2048} ref={hiddenRef} />
