@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import * as d3 from 'd3';
 
-const GradientBar = ({ color, onSliderChange, onFinishChange, sliderPosition, topic }) => {
-    const [isDragging, setIsDragging] = useState(false);
-    const [sliderColor, setSliderColor] = useState(color);
+const GradientBar = ({ color, onSliderChangeLeft, onSliderChangeRight, onFinishChange, sliderPositionLeft, sliderPositionRight, topic }) => {
+    const [isDraggingLeft, setIsDraggingLeft] = useState(false);
+    const [isDraggingRight, setIsDraggingRight] = useState(false);
+    const [sliderColorLeft, setSliderColorLeft] = useState("#ffffff");
+    const [sliderColorRight, setSliderColorRight] = useState(color);
 
     const gradientStyle = {
         background: `linear-gradient(to right, #ffffff, ${color})`,
@@ -14,13 +16,28 @@ const GradientBar = ({ color, onSliderChange, onFinishChange, sliderPosition, to
         boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.2)' // Box shadow for depth
     };
 
-    const sliderStyle = {
+    const sliderStyleLeft = {
         width: '26px', // Slightly larger than the bar's height
         height: '26px', // Slightly larger than the bar's height
-        background: sliderColor,
+        background: sliderColorLeft,
         borderRadius: '50%', // Circular shape
         position: 'absolute',
-        left: `${sliderPosition}%`,
+        left: `${sliderPositionLeft}%`,
+        cursor: 'pointer',
+        transform: 'translate(-50%, -50%)', // Centered on the bar
+        boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.3)', // Shadow effect
+        border: '4px solid white', // Thick white border
+        boxSizing: 'border-box',
+        'margin-top': '8.9px'
+    };
+
+    const sliderStyleRight = {
+        width: '26px', // Slightly larger than the bar's height
+        height: '26px', // Slightly larger than the bar's height
+        background: sliderColorRight,
+        borderRadius: '50%', // Circular shape
+        position: 'absolute',
+        left: `${sliderPositionRight}%`,
         cursor: 'pointer',
         transform: 'translate(-50%, -50%)', // Centered on the bar
         boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.3)', // Shadow effect
@@ -31,38 +48,45 @@ const GradientBar = ({ color, onSliderChange, onFinishChange, sliderPosition, to
 
     useEffect(() => {
         const interpolateColor = d3.interpolateRgb("#ffffff", color);
-        const newSliderColor = interpolateColor(sliderPosition / 100);
-        setSliderColor(newSliderColor);
-    }, [color, sliderPosition]);
+        setSliderColorLeft(interpolateColor(sliderPositionLeft / 100));
+        setSliderColorRight(interpolateColor(sliderPositionRight / 100));
+    }, [color, sliderPositionLeft, sliderPositionRight]);
 
     let barRect = null
-    const handleMouseDown = (event) => {
-        setIsDragging(true);
+    const handleMouseDownLeft = (event) => {
+        setIsDraggingLeft(true);
+    };
+    const handleMouseDownRight = (event) => {
+        setIsDraggingRight(true);
     };
 
     const handleMouseUp = (event) => {
-        setIsDragging(false);
-        barRect = document.getElementById(`colorBar_${topic}`).getBoundingClientRect()
-        let newSliderPosition = ((event.clientX - barRect.left) / barRect.width) * 100;
-        //console.log("Mouse Position: ", event.clientX, newSliderPosition, barRect.left, barRect.width)
-        newSliderPosition = Math.max(0, Math.min(newSliderPosition, 100)); // Clamp between 0 and 100
-        onFinishChange(newSliderPosition);
+        setIsDraggingLeft(false);
+        setIsDraggingRight(false);
+        onFinishChange();
     };
 
     const handleMouseMove = (event) => {
-        if (isDragging) {
+        if (isDraggingLeft) {
             barRect = document.getElementById(`colorBar_${topic}`).getBoundingClientRect()
             let newSliderPosition = ((event.clientX - barRect.left) / barRect.width) * 100;
             //console.log("Mouse Position: ", event.clientX, newSliderPosition, barRect.left, barRect.width)
-            newSliderPosition = Math.max(0, Math.min(newSliderPosition, 100)); // Clamp between 0 and 100
-            onSliderChange(newSliderPosition);
+            newSliderPosition = Math.max(0, Math.min(newSliderPosition, sliderPositionRight - 5)); // Clamp between 0 and right slider
+            onSliderChangeLeft(newSliderPosition);
+        }
+        if (isDraggingRight) {
+            barRect = document.getElementById(`colorBar_${topic}`).getBoundingClientRect()
+            let newSliderPosition = ((event.clientX - barRect.left) / barRect.width) * 100;
+            //console.log("Mouse Position: ", event.clientX, newSliderPosition, barRect.left, barRect.width)
+            newSliderPosition = Math.max(sliderPositionLeft + 5, Math.min(newSliderPosition, 100)); // Clamp between left slider and 100
+            onSliderChangeRight(newSliderPosition);
         }
     };
 
     useEffect(() => {
         const handleMouseUpGlobal = () => {
-            if (isDragging) {
-                setIsDragging(false);
+            if (isDraggingLeft) {
+                setIsDraggingLeft(false);
             }
         };
 
@@ -70,7 +94,20 @@ const GradientBar = ({ color, onSliderChange, onFinishChange, sliderPosition, to
         return () => {
             window.removeEventListener('mouseup', handleMouseUpGlobal);
         };
-    }, [isDragging]);
+    }, [isDraggingLeft]);
+
+    useEffect(() => {
+        const handleMouseUpGlobal = () => {
+            if (isDraggingRight) {
+                setIsDraggingRight(false);
+            }
+        };
+
+        window.addEventListener('mouseup', handleMouseUpGlobal);
+        return () => {
+            window.removeEventListener('mouseup', handleMouseUpGlobal);
+        };
+    }, [isDraggingRight]);
 
     return (
         <div
@@ -80,8 +117,12 @@ const GradientBar = ({ color, onSliderChange, onFinishChange, sliderPosition, to
             id={`colorBar_${topic}`}
         >
             <div
-                style={sliderStyle}
-                onMouseDown={handleMouseDown}
+                style={sliderStyleLeft}
+                onMouseDown={handleMouseDownLeft}
+            ></div>
+                        <div
+                style={sliderStyleRight}
+                onMouseDown={handleMouseDownRight}
             ></div>
         </div>
     );

@@ -76,9 +76,12 @@ function App() {
   const toggleColorPickerL6 = () => setShowColorPickerL6(!showColorPickerL6);
   const toggleColorPickerOverlay = () => setShowColorPickerOverlay(!showColorPickerOverlay);
 
-  const [sliderPositionL5, setSliderPositionL5] = useState(100); // State for L5 slider position
-  const [sliderPositionL6, setSliderPositionL6] = useState(100); // State for L6 slider position
-  const [sliderPositionOverlay, setSliderPositionOverlay] = useState(100); // State for L6 slider position
+  const [sliderPositionL5Left, setSliderPositionL5Left] = useState(0); // State for L5 slider position
+  const [sliderPositionL6Left, setSliderPositionL6Left] = useState(0); // State for L6 slider position
+  const [sliderPositionOverlayLeft, setSliderPositionOverlayLeft] = useState(0); // State for L6 slider position
+  const [sliderPositionL5Right, setSliderPositionL5Right] = useState(100); // State for L5 slider position
+  const [sliderPositionL6Right, setSliderPositionL6Right] = useState(100); // State for L6 slider position
+  const [sliderPositionOverlayRight, setSliderPositionOverlayRight] = useState(100); // State for L6 slider position
 
   const [colormapBottomL5, setColormapBottomL5] = useState(0.0);
   const [colormapTopL5, setColormapTopL5] = useState(1.0);
@@ -146,43 +149,16 @@ function App() {
     setSaturation(newSaturation);
   };
 
-  // Function to handle slider position change for L5
-  const handleSliderChangeL5 = (newPosition) => {
-    setSliderPositionL5(newPosition);
-    // Additional logic to convert newPosition to a color for L5, if needed
-  };
-
-  // Function to handle slider position change for L6
-  const handleSliderChangeL6 = (newPosition) => {
-    //console.log("Slider Position:", newPosition);
-    setSliderPositionL6(newPosition);
-    // Additional logic to convert newPosition to a color for L6, if needed
-  };
-
-  const handleSliderChangeOverlay = (newPosition) => {
-    setSliderPositionOverlay(newPosition);
-    // Additional logic to convert newPosition to a color for L6, if needed
-  };
-
   const handleSliderFinishL5 = () => {
-    var bottom = sliderPositionL5 > 50 ? (sliderPositionL5 - 50) / 50 : 0;
-    var top = sliderPositionL5 < 50 ? sliderPositionL5 / 50 : 1;
-    setColormapBottomL5(bottom);
-    setColormapTopL5(top);
+    colorL5Data();
   }
 
   const handleSliderFinishL6 = () => {
-    var bottom = sliderPositionL6 > 50 ? (sliderPositionL6 - 50) / 50 : 0;
-    var top = sliderPositionL6 < 50 ? sliderPositionL6 / 50 : 1;
-    setColormapBottomL6(bottom);
-    setColormapTopL6(top);
+    colorL6Data();
   }
 
   const handleSliderFinishOverlay = () => {
-    var bottom = sliderPositionOverlay > 50 ? (sliderPositionOverlay - 50) / 50 : 0;
-    var top = sliderPositionOverlay < 50 ? sliderPositionOverlay / 50 : 1;
-    setColormapBottomOverlay(bottom);
-    setColormapTopOverlay(top);
+    colorOverlayData();
   }
 
   const setColormapL5 = (newColor) => {
@@ -216,11 +192,9 @@ function App() {
   function colorL5Data() {
     console.time('color');
     if (dataL5) {
-      // Assume sliderPositionL5 is between 0 and 100
-      var colorAtSlider = d3.interpolateRgb("#ffffff", colorL5)(sliderPositionL5 / 100);
-  
-      var bt = d3.color("#ffffff");
-      var tp = d3.color(colorAtSlider);
+      // Assume sliderPositionL5 is between 0 and 100  
+      var bt = d3.color(d3.interpolateRgb("#ffffff", colorL5)(sliderPositionL5Left / 100));
+      var tp = d3.color(d3.interpolateRgb("#ffffff", colorL5)(sliderPositionL5Right / 100));
       const colorVal = (prop, value) =>
         Math.round(bt[prop] * (1 - value) + tp[prop] * value);
 
@@ -233,11 +207,9 @@ function App() {
 
   function colorL6Data() {
     if (dataL6) {
-      // Assuming sliderPositionL6 is between 0 and 100
-      var colorAtSlider = d3.interpolateRgb("#ffffff", colorL6)(sliderPositionL6 / 100);
-  
-      var bt = d3.color("#ffffff");
-      var tp = d3.color(colorAtSlider);
+      // Assume sliderPositionL5 is between 0 and 100  
+      var bt = d3.color(d3.interpolateRgb("#ffffff", colorL6)(sliderPositionL6Left / 100));
+      var tp = d3.color(d3.interpolateRgb("#ffffff", colorL6)(sliderPositionL6Right / 100));
       const colorVal = (prop, value) =>
         Math.round(bt[prop] * (1 - value) + tp[prop] * value);
 
@@ -249,11 +221,9 @@ function App() {
 
   function colorOverlayData() {
     if (dataL5 && dataL6) {
-      // Assuming sliderPositionOverlay is between 0 and 100
-      var colorAtSlider = d3.interpolateRgb("#ffffff", colorOverlay)(sliderPositionOverlay / 100);
-  
-      var bt = d3.color("#ffffff");
-      var tp = d3.color(colorAtSlider);
+      // Assume sliderPositionL5 is between 0 and 100  
+      var bt = d3.color(d3.interpolateRgb("#ffffff", colorOverlay)(sliderPositionOverlayLeft / 100));
+      var tp = d3.color(d3.interpolateRgb("#ffffff", colorOverlay)(sliderPositionOverlayRight / 100));
       const colorVal = (prop, value) =>
         Math.round(bt[prop] * (1 - value) + tp[prop] * value);
 
@@ -672,8 +642,10 @@ function App() {
                 <h3>L5 Cell Color</h3>
                 <GradientBar
                   color={colorL5}
-                  sliderPosition={sliderPositionL5}
-                  onSliderChange={handleSliderChangeL5}
+                  sliderPositionLeft={sliderPositionL5Left}
+                  sliderPositionRight={sliderPositionL5Right}
+                  onSliderChangeLeft={setSliderPositionL5Left}
+                  onSliderChangeRight={setSliderPositionL5Right}
                   onFinishChange={handleSliderFinishL5}
                   topic={"l5"}
                 />
@@ -700,8 +672,10 @@ function App() {
 
                 <GradientBar
                   color={colorL6}
-                  sliderPosition={sliderPositionL6}
-                  onSliderChange={handleSliderChangeL6}
+                  sliderPositionLeft={sliderPositionL6Left}
+                  sliderPositionRight={sliderPositionL6Right}
+                  onSliderChangeLeft={setSliderPositionL6Left}
+                  onSliderChangeRight={setSliderPositionL6Right}
                   onFinishChange={handleSliderFinishL6}
                   topic={"l6"}
                 />
@@ -727,8 +701,10 @@ function App() {
 
                 <GradientBar
                   color={colorOverlay}
-                  sliderPosition={sliderPositionOverlay}
-                  onSliderChange={handleSliderChangeOverlay}
+                  sliderPositionLeft={sliderPositionOverlayLeft}
+                  sliderPositionRight={sliderPositionOverlayRight}
+                  onSliderChangeLeft={setSliderPositionOverlayLeft}
+                  onSliderChangeRight={setSliderPositionOverlayRight}
                   onFinishChange={handleSliderFinishOverlay}
                   topic={"overlay"}
                 />
