@@ -550,6 +550,27 @@ function App() {
     setPolyPoints([]);
   }
 
+  const resetSettings = (e) => {
+    e.preventDefault();
+    setPolyPoints([]);
+    setThresholdL5(0.2);
+    setThresholdL5Inside(0.2);
+    setThresholdL5Outside(0.2);
+    setThresholdL6(0.2);
+    setThresholdL6Inside(0.2);
+    setThresholdL6Outside(0.2);
+    setOpacityL5(0.5);
+    setOpacityL5Inside(0.5);
+    setOpacityL5Outside(0.5);
+    setOpacityL6(0.5);
+    setOpacityL6Inside(0.5);
+    setOpacityL6Outside(0.5);
+    setContrastL5(1.0);
+    setContrastL6(1.0);
+    setContrastOverlay(1.0);
+    setPolygonType('neither');
+  }
+
   // save canvases as PNGs when the Save Images button is selected
   const saveImages = (e) => {
     e.preventDefault();
@@ -622,7 +643,8 @@ function App() {
           </ToggleButtonGroup>
         </div>
         <div style={{ 'justifyContent': 'right' }}>
-          <Button className="action-button reset-button" onClick={resetPolygon} style={{ 'margin-right': '2px' }}>Reset Polygon</Button>
+          <Button className="action-button reset-polygon-button" onClick={resetPolygon} style={{ 'margin-right': '2px' }}>Reset Polygon</Button>
+          <Button className="action-button reset-settings-button" onClick={resetSettings} style={{ 'margin-right': '2px' }}>Reset Settings</Button>
           <Button className="action-button load-data-button" onClick={loadImages} style={{ 'margin-right': '2px' }}>Load Data</Button>
           <Button className="action-button save-image-button" onClick={saveImages} style={{ 'margin-right': '2px' }}>Save Images</Button>
         </div>
