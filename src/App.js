@@ -94,9 +94,9 @@ function App() {
   const [toggleOutsidePolySliders, setToggleOutsidePolySliders] = useState(false);
   const [toggleNeitherPolySliders, setToggleNeitherPolySliders] = useState(true);
   const polyTypeToToggle = {
-    'neither': () => {setToggleInsidePolySliders(false); setToggleOutsidePolySliders(false); setToggleNeitherPolySliders(true)},
-    'outside': () => {setToggleInsidePolySliders(false); setToggleOutsidePolySliders(true); setToggleNeitherPolySliders(false)},
-    'inside': () => {setToggleInsidePolySliders(true); setToggleOutsidePolySliders(false); setToggleNeitherPolySliders(false)},
+    'neither': () => { setToggleInsidePolySliders(false); setToggleOutsidePolySliders(false); setToggleNeitherPolySliders(true) },
+    'outside': () => { setToggleInsidePolySliders(false); setToggleOutsidePolySliders(true); setToggleNeitherPolySliders(false) },
+    'inside': () => { setToggleInsidePolySliders(true); setToggleOutsidePolySliders(false); setToggleNeitherPolySliders(false) },
   }
   const [polygonType, setPolygonType] = useState('neither');
   useEffect(() => {
@@ -201,13 +201,13 @@ function App() {
   var hiddenRef = useRef(null);
   var dataFetched = false;
 
-  function addPolyPointL5 (event) {
+  function addPolyPointL5(event) {
     addPolyPoint(canvasRefL5.current, event);
   }
-  function addPolyPointL6 (event) {
+  function addPolyPointL6(event) {
     addPolyPoint(canvasRefL6.current, event);
   }
-  function addPolyPointOverlay (event) {
+  function addPolyPointOverlay(event) {
     addPolyPoint(canvasRefOverlay.current, event);
   }
 
@@ -221,7 +221,7 @@ function App() {
         Math.round(bt[prop] * (1 - value) + tp[prop] * value);
 
       setColorDataL5(dataL5.map((value) => {
-        return {'r': colorVal('r', value), 'g': colorVal('g', value), 'b': colorVal('b', value)}
+        return { 'r': colorVal('r', value), 'g': colorVal('g', value), 'b': colorVal('b', value) }
       }));
     }
     console.timeEnd('color');
@@ -236,7 +236,7 @@ function App() {
         Math.round(bt[prop] * (1 - value) + tp[prop] * value);
 
       setColorDataL6(dataL6.map((value) => {
-        return {'r': colorVal('r', value), 'g': colorVal('g', value), 'b': colorVal('b', value)}
+        return { 'r': colorVal('r', value), 'g': colorVal('g', value), 'b': colorVal('b', value) }
       }));
     }
   }
@@ -250,7 +250,7 @@ function App() {
         Math.round(bt[prop] * (1 - value) + tp[prop] * value);
 
       setColorDataOverlay(dataOverlay.map((value) => {
-        return {'r': colorVal('r', value), 'g': colorVal('g', value), 'b': colorVal('b', value)}
+        return { 'r': colorVal('r', value), 'g': colorVal('g', value), 'b': colorVal('b', value) }
       }));
     }
   }
@@ -259,21 +259,21 @@ function App() {
   function makeImageData(data, colorData, context, polyTypeToThreshold) {
     const imageData = context.createImageData(dataW, dataH);
     for (var i = 0; i < data.length; i++) {
-      let color = {r: 255, g: 255, b: 255};
+      let color = { r: 255, g: 255, b: 255 };
       if (polygonType != 'neither') {
         var inside = pointInPolygon([(i % dataW) / dataW, (i / dataW) / dataH], polyPoints);
         if (inside) {
-          color = data[i] > polyTypeToThreshold['inside'] ? colorData[i] : {r: 255, g: 255, b: 255};
+          color = data[i] > polyTypeToThreshold['inside'] ? colorData[i] : { r: 255, g: 255, b: 255 };
         } else {
-          color = data[i] > polyTypeToThreshold['outside'] ? colorData[i] : {r: 255, g: 255, b: 255};
+          color = data[i] > polyTypeToThreshold['outside'] ? colorData[i] : { r: 255, g: 255, b: 255 };
         }
       } else {
-        color = data[i] > polyTypeToThreshold['neither'] ? colorData[i] : {r: 255, g: 255, b: 255};
+        color = data[i] > polyTypeToThreshold['neither'] ? colorData[i] : { r: 255, g: 255, b: 255 };
       }
       imageData.data[i * 4] = color.r;
       imageData.data[i * 4 + 1] = color.g;
       imageData.data[i * 4 + 2] = color.b;
-      imageData.data[i * 4 + 3] = 255;    
+      imageData.data[i * 4 + 3] = 255;
     }
     return imageData;
   }
@@ -325,7 +325,7 @@ function App() {
             opacL6 = opacityL6Outside;
           }
         }
-        let color = { r: 255, g: 255, b: 255};
+        let color = { r: 255, g: 255, b: 255 };
         let a = 1;
         if (dataL5[i] > threshL5) {
           if (dataL6[i] > threshL6) {
@@ -356,7 +356,7 @@ function App() {
       console.timeEnd("foreach");
       console.log("reshow overlay");
       context.putImageData(imageData, 0, 0);
-      for (var i = 0; i < polyPoints.length; i+=2) {
+      for (var i = 0; i < polyPoints.length; i += 2) {
         drawPolyPoint(polyPoints[i], polyPoints[i + 1]);
       }
     }
@@ -572,275 +572,276 @@ function App() {
     elemOverlay.click();
   }
 
-    // TODO: load images by file (not necessary now cause only one data file)
-    const loadImages = (e) => {
-      e.preventDefault();
-      alert("Loading file data disabled for demo!");
-    }
+  // TODO: load images by file (not necessary now cause only one data file)
+  const loadImages = (e) => {
+    e.preventDefault();
+    alert("Loading file data disabled for demo!");
+  }
 
   return (
     <div
       tabIndex={0}
       className="App" style={{ 'height': '100vh', 'width': '100vw' }}
     >
-    <div style={{ 'display': 'flex', 'flex-direction': 'row', 'justifyContent': 'space-between'}}>
-      <div style={{'justifyContent': 'left'}}>
-      <ToggleButtonGroup
-        value={polygonType}
-        onChange={(event, newValue) => {
-          setPolygonType(newValue);
-        }}
-      >
-        <Button value="inside">Change Settings Inside Polygon</Button>
-        <Button value="outside">Change Settings Outside Polygon</Button>
-        <Button value="neither">Change Settings Everywhere</Button>
-      </ToggleButtonGroup>
-      </div>
-      <div style={{'justifyContent': 'left'}}>
-      <ToggleButtonGroup
-        value={overlayType}
-        onChange={(event, newValue) => {
-          setOverlayType(newValue);
-        }}
-      >
-        <Button value="color">Overlay Data with Overlap Color</Button>
-        <Button value="opacity">Overlay Data with Opacity</Button>
-      </ToggleButtonGroup>
-      </div>
-      <div style= {{'justifyContent': 'right'}}>
-        <Button onClick={loadImages} style={{'margin-right': '5px'}}>Load Data</Button>
-        <Button onClick={saveImages} style={{'margin-right': '5px'}}>Save Images</Button>
-      </div>
-    </div>
       <div className="header-container" >
         <h1>{"Visualization of Cortical Cell Expressiveness"}</h1>
       </div>
-      <div>{"Click and Drag to Pan, Scroll to Zoom, Double Click to Select Polygon Points"}</div>
+      <div>{"Click and Drag to Pan, Scroll to Zoom, Double Click to Select Polygon Points"}</div>&nbsp;
+      <div style={{ 'display': 'flex', 'flex-direction': 'row', 'justifyContent': 'space-between' }}>
+        <div style={{ 'justifyContent': 'left' }}>
+          <ToggleButtonGroup
+            value={polygonType}
+            onChange={(event, newValue) => {
+              setPolygonType(newValue);
+            }}
+          >
+            <Button value="inside" style={{ 'margin-left': '5px' }}>Change Settings Inside Polygon</Button>
+            <Button value="outside">Change Settings Outside Polygon</Button>
+            <Button value="neither">Change Settings Everywhere</Button>
+          </ToggleButtonGroup>
+        </div>
+        <div style={{ 'justifyContent': 'left' }}>
+          <ToggleButtonGroup
+            value={overlayType}
+            onChange={(event, newValue) => {
+              setOverlayType(newValue);
+            }}
+          >
+            <Button value="color">Overlay Data with Overlap Color</Button>
+            <Button value="opacity">Overlay Data with Opacity</Button>
+          </ToggleButtonGroup>
+        </div>
+        <div style={{ 'justifyContent': 'right' }}>
+          <Button className="action-button load-data-button" onClick={loadImages} style={{ 'margin-right': '5px' }}>Load Data</Button>
+          <Button className="action-button save-image-button" onClick={saveImages} style={{ 'margin-right': '5px' }}>Save Images</Button>
+        </div>
+      </div>&nbsp;
+      <div className="Filter">Filters</div>
       {toggleNeitherPolySliders && (
         <div>
-          <div className='sliders-container'>\
-          <div className="slider-section">
-            <div className="slider-label">L5 Threshold</div>
-            <div className="slider-container">
-              <Slider 
-                defaultValue={thresholdL5} 
-                step={0.01}
-                min={0.0}
-                max={1.0}
-                aria-label="Default" 
-                valueLabelDisplay="auto" 
-                onChangeCommitted={(event, newValue) => {setThresholdL5(newValue)}}
-              />
-            </div>
-            <div className="slider-label">L6 Threshold</div>
-            <div className="slider-container">
-              <Slider 
-                defaultValue={thresholdL6} 
-                step={0.01}
-                min={0.0}
-                max={1.0}
-                aria-label="Default" 
-                valueLabelDisplay="auto"  
-                onChangeCommitted={(event, newValue) => {setThresholdL6(newValue)}}
-              />          
-            </div>
-          </div>
-        </div>
-        <div className='sliders-container'>
-          <div className="slider-section">
-            <div className="slider-label">L5 Opacity in Overlay</div>
-            <div className="slider-container">
-              <Slider 
-                defaultValue={opacityL5} 
-                step={0.05}
-                min={0.0}
-                max={1.0}
-                aria-label="Default" 
-                valueLabelDisplay="auto" 
-                onChangeCommitted={(event, newValue) => {setOpacityL5(newValue)}}
-              />
-            </div>
-            <div className="slider-label">L6 Opacity in Overlay</div>
-            <div className="slider-container">
-              <Slider 
-                defaultValue={opacityL6} 
-                step={0.05}
-                min={0.0}
-                max={1.0}
-                aria-label="Default" 
-                valueLabelDisplay="auto"  
-                onChangeCommitted={(event, newValue) => {setOpacityL6(newValue)}}
-              />          
+          <div className='sliders-container'>
+            <div className="slider-section">
+              <div className="slider-label">L5 Threshold</div>
+              <div className="slider-container">
+                <Slider
+                  defaultValue={thresholdL5}
+                  step={0.01}
+                  min={0.0}
+                  max={1.0}
+                  aria-label="Default"
+                  valueLabelDisplay="auto"
+                  onChangeCommitted={(event, newValue) => { setThresholdL5(newValue) }}
+                />
+              </div>
+              <div className="slider-label">L6 Threshold</div>
+              <div className="slider-container">
+                <Slider
+                  defaultValue={thresholdL6}
+                  step={0.01}
+                  min={0.0}
+                  max={1.0}
+                  aria-label="Default"
+                  valueLabelDisplay="auto"
+                  onChangeCommitted={(event, newValue) => { setThresholdL6(newValue) }}
+                />
+              </div>
             </div>
           </div>
-        </div>
-      </div>)}
+          <div className='sliders-container'>
+            <div className="slider-section">
+              <div className="slider-label">L5 Opacity in Overlay</div>
+              <div className="slider-container">
+                <Slider
+                  defaultValue={opacityL5}
+                  step={0.05}
+                  min={0.0}
+                  max={1.0}
+                  aria-label="Default"
+                  valueLabelDisplay="auto"
+                  onChangeCommitted={(event, newValue) => { setOpacityL5(newValue) }}
+                />
+              </div>
+              <div className="slider-label">L6 Opacity in Overlay</div>
+              <div className="slider-container">
+                <Slider
+                  defaultValue={opacityL6}
+                  step={0.05}
+                  min={0.0}
+                  max={1.0}
+                  aria-label="Default"
+                  valueLabelDisplay="auto"
+                  onChangeCommitted={(event, newValue) => { setOpacityL6(newValue) }}
+                />
+              </div>
+            </div>
+          </div>
+        </div>)}
       {toggleInsidePolySliders && (
         <div>
-          <div className='sliders-container'>\
-          <div className="slider-section">
-            <div className="slider-label">L5 Threshold (Inside Polygon)</div>
-            <div className="slider-container">
-              <Slider 
-                defaultValue={thresholdL5Inside} 
-                step={0.01}
-                min={0.0}
-                max={1.0}
-                aria-label="Default" 
-                valueLabelDisplay="auto" 
-                onChangeCommitted={(event, newValue) => {setThresholdL5Inside(newValue)}}
-              />
-            </div>
-            <div className="slider-label">L6 Threshold (Inside Polygon)</div>
-            <div className="slider-container">
-              <Slider 
-                defaultValue={thresholdL6Inside} 
-                step={0.01}
-                min={0.0}
-                max={1.0}
-                aria-label="Default" 
-                valueLabelDisplay="auto"  
-                onChangeCommitted={(event, newValue) => {setThresholdL6Inside(newValue)}}
-              />          
-            </div>
-          </div>
-        </div>
-        <div className='sliders-container'>
-          <div className="slider-section">
-            <div className="slider-label">L5 Opacity in Overlay (Inside Polygon)</div>
-            <div className="slider-container">
-              <Slider 
-                defaultValue={opacityL5Inside} 
-                step={0.05}
-                min={0.0}
-                max={1.0}
-                aria-label="Default" 
-                valueLabelDisplay="auto" 
-                onChangeCommitted={(event, newValue) => {setOpacityL5Inside(newValue)}}
-              />
-            </div>
-            <div className="slider-label">L6 Opacity in Overlay (Inside Polygon)</div>
-            <div className="slider-container">
-              <Slider 
-                defaultValue={opacityL6Inside} 
-                step={0.05}
-                min={0.0}
-                max={1.0}
-                aria-label="Default" 
-                valueLabelDisplay="auto"  
-                onChangeCommitted={(event, newValue) => {setOpacityL6Inside(newValue)}}
-              />          
+          <div className='sliders-container'>
+            <div className="slider-section">
+              <div className="slider-label">L5 Threshold (Inside Polygon)</div>
+              <div className="slider-container">
+                <Slider
+                  defaultValue={thresholdL5Inside}
+                  step={0.01}
+                  min={0.0}
+                  max={1.0}
+                  aria-label="Default"
+                  valueLabelDisplay="auto"
+                  onChangeCommitted={(event, newValue) => { setThresholdL5Inside(newValue) }}
+                />
+              </div>
+              <div className="slider-label">L6 Threshold (Inside Polygon)</div>
+              <div className="slider-container">
+                <Slider
+                  defaultValue={thresholdL6Inside}
+                  step={0.01}
+                  min={0.0}
+                  max={1.0}
+                  aria-label="Default"
+                  valueLabelDisplay="auto"
+                  onChangeCommitted={(event, newValue) => { setThresholdL6Inside(newValue) }}
+                />
+              </div>
             </div>
           </div>
-        </div>
-      </div>)}
+          <div className='sliders-container'>
+            <div className="slider-section">
+              <div className="slider-label">L5 Opacity in Overlay (Inside Polygon)</div>
+              <div className="slider-container">
+                <Slider
+                  defaultValue={opacityL5Inside}
+                  step={0.05}
+                  min={0.0}
+                  max={1.0}
+                  aria-label="Default"
+                  valueLabelDisplay="auto"
+                  onChangeCommitted={(event, newValue) => { setOpacityL5Inside(newValue) }}
+                />
+              </div>
+              <div className="slider-label">L6 Opacity in Overlay (Inside Polygon)</div>
+              <div className="slider-container">
+                <Slider
+                  defaultValue={opacityL6Inside}
+                  step={0.05}
+                  min={0.0}
+                  max={1.0}
+                  aria-label="Default"
+                  valueLabelDisplay="auto"
+                  onChangeCommitted={(event, newValue) => { setOpacityL6Inside(newValue) }}
+                />
+              </div>
+            </div>
+          </div>
+        </div>)}
       {toggleOutsidePolySliders && (
         <div>
-          <div className='sliders-container'>\
-          <div className="slider-section">
-            <div className="slider-label">L5 Threshold (Outside Polygon)</div>
-            <div className="slider-container">
-              <Slider 
-                defaultValue={thresholdL5Outside} 
-                step={0.01}
-                min={0.0}
-                max={1.0}
-                aria-label="Default" 
-                valueLabelDisplay="auto" 
-                onChangeCommitted={(event, newValue) => {setThresholdL5Outside(newValue)}}
-              />
-            </div>
-            <div className="slider-label">L6 Threshold (Outside Polygon)</div>
-            <div className="slider-container">
-              <Slider 
-                defaultValue={thresholdL6Outside} 
-                step={0.01}
-                min={0.0}
-                max={1.0}
-                aria-label="Default" 
-                valueLabelDisplay="auto"  
-                onChangeCommitted={(event, newValue) => {setThresholdL6Outside(newValue)}}
-              />          
-            </div>
-          </div>
-        </div>
-        <div className='sliders-container'>
-          <div className="slider-section">
-            <div className="slider-label">L5 Opacity in Overlay (Outside Polygon)</div>
-            <div className="slider-container">
-              <Slider 
-                defaultValue={opacityL5Outside} 
-                step={0.05}
-                min={0.0}
-                max={1.0}
-                aria-label="Default" 
-                valueLabelDisplay="auto" 
-                onChangeCommitted={(event, newValue) => {setOpacityL5Outside(newValue)}}
-              />
-            </div>
-            <div className="slider-label">L6 Opacity in Overlay (Outside Polygon)</div>
-            <div className="slider-container">
-              <Slider 
-                defaultValue={opacityL6Outside} 
-                step={0.05}
-                min={0.0}
-                max={1.0}
-                aria-label="Default" 
-                valueLabelDisplay="auto"  
-                onChangeCommitted={(event, newValue) => {setOpacityL6Outside(newValue)}}
-              />          
+          <div className='sliders-container'>
+            <div className="slider-section">
+              <div className="slider-label">L5 Threshold (Outside Polygon)</div>
+              <div className="slider-container">
+                <Slider
+                  defaultValue={thresholdL5Outside}
+                  step={0.01}
+                  min={0.0}
+                  max={1.0}
+                  aria-label="Default"
+                  valueLabelDisplay="auto"
+                  onChangeCommitted={(event, newValue) => { setThresholdL5Outside(newValue) }}
+                />
+              </div>
+              <div className="slider-label">L6 Threshold (Outside Polygon)</div>
+              <div className="slider-container">
+                <Slider
+                  defaultValue={thresholdL6Outside}
+                  step={0.01}
+                  min={0.0}
+                  max={1.0}
+                  aria-label="Default"
+                  valueLabelDisplay="auto"
+                  onChangeCommitted={(event, newValue) => { setThresholdL6Outside(newValue) }}
+                />
+              </div>
             </div>
           </div>
-        </div>
-      </div>)}
+          <div className='sliders-container'>
+            <div className="slider-section">
+              <div className="slider-label">L5 Opacity in Overlay (Outside Polygon)</div>
+              <div className="slider-container">
+                <Slider
+                  defaultValue={opacityL5Outside}
+                  step={0.05}
+                  min={0.0}
+                  max={1.0}
+                  aria-label="Default"
+                  valueLabelDisplay="auto"
+                  onChangeCommitted={(event, newValue) => { setOpacityL5Outside(newValue) }}
+                />
+              </div>
+              <div className="slider-label">L6 Opacity in Overlay (Outside Polygon)</div>
+              <div className="slider-container">
+                <Slider
+                  defaultValue={opacityL6Outside}
+                  step={0.05}
+                  min={0.0}
+                  max={1.0}
+                  aria-label="Default"
+                  valueLabelDisplay="auto"
+                  onChangeCommitted={(event, newValue) => { setOpacityL6Outside(newValue) }}
+                />
+              </div>
+            </div>
+          </div>
+        </div>)}
       <div className='sliders-container'>
         <div className="slider-section">
           <div className="slider-label">L5 Contrast</div>
           <div className="slider-container">
-            <Slider 
-              defaultValue={contrastL5} 
+            <Slider
+              defaultValue={contrastL5}
               step={0.05}
               min={0.8}
               max={1.5}
-              aria-label="Default" 
-              valueLabelDisplay="auto" 
-              onChangeCommitted={(event, newValue) => {setContrastL5(newValue)}}
+              aria-label="Default"
+              valueLabelDisplay="auto"
+              onChangeCommitted={(event, newValue) => { setContrastL5(newValue) }}
             />
           </div>
           <div className="slider-label">L6 Contrast</div>
           <div className="slider-container">
-            <Slider 
-              defaultValue={contrastL6} 
+            <Slider
+              defaultValue={contrastL6}
               step={0.05}
               min={0.8}
               max={1.5}
-              aria-label="Default" 
-              valueLabelDisplay="auto"  
-              onChangeCommitted={(event, newValue) => {setContrastL6(newValue)}}
-            />          
+              aria-label="Default"
+              valueLabelDisplay="auto"
+              onChangeCommitted={(event, newValue) => { setContrastL6(newValue) }}
+            />
           </div>
           <div className="slider-label">Overlay Contrast</div>
           <div className="slider-container">
-            <Slider 
-              defaultValue={contrastOverlay} 
+            <Slider
+              defaultValue={contrastOverlay}
               step={0.05}
               min={0.8}
               max={1.5}
-              aria-label="Default" 
-              valueLabelDisplay="auto"  
-              onChangeCommitted={(event, newValue) => {setContrastOverlay(newValue)}}
-            />          
+              aria-label="Default"
+              valueLabelDisplay="auto"
+              onChangeCommitted={(event, newValue) => { setContrastOverlay(newValue) }}
+            />
           </div>
         </div>
       </div>
       <div style={{ 'display': 'flex', 'flex-direction': 'row', 'justify-content': 'center' }}>
-        <div style={{'border': '5px solid #f0f0f0'}}>
+        <div style={{ 'border': '5px solid #f0f0f0' }}>
           <canvas width={2048} height={2048} ref={canvasRefL5} />
         </div>
-        <div style={{'border': '5px solid #f0f0f0'}}>
+        <div style={{ 'border': '5px solid #f0f0f0' }}>
           <canvas width={2048} height={2048} ref={canvasRefL6} />
         </div>
-        <div style={{'border': '5px solid #f0f0f0'}}>
+        <div style={{ 'border': '5px solid #f0f0f0' }}>
           <canvas width={2048} height={2048} ref={canvasRefOverlay} />
         </div>
         <canvas hidden={true} width={2048} height={2048} ref={hiddenRef} />
