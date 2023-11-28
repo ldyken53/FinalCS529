@@ -156,6 +156,9 @@ function App() {
     canvasRefL5.current.addEventListener('dblclick', addPolyPointL5);
     canvasRefL6.current.addEventListener('dblclick', addPolyPointL6);
     canvasRefOverlay.current.addEventListener('dblclick', addPolyPointOverlay);
+    imShowL5();
+    imShowL6();
+    imShowOverlay();
 
     return () => {
       canvasRefL5.current.removeEventListener('dblclick', addPolyPointL5);
@@ -344,7 +347,7 @@ function App() {
             color = colorDataL5[i];
             a = opacL5;
           }
-        } else if (dataL6[i] > thresholdL6) {
+        } else if (dataL6[i] > threshL6) {
           color = colorDataL6[i];
           a = opacL6;
         }
@@ -542,6 +545,11 @@ function App() {
     });
   }
 
+  const resetPolygon = (e) => {
+    e.preventDefault();
+    setPolyPoints([]);
+  }
+
   // save canvases as PNGs when the Save Images button is selected
   const saveImages = (e) => {
     e.preventDefault();
@@ -614,8 +622,9 @@ function App() {
           </ToggleButtonGroup>
         </div>
         <div style={{ 'justifyContent': 'right' }}>
-          <Button className="action-button load-data-button" onClick={loadImages} style={{ 'margin-right': '5px' }}>Load Data</Button>
-          <Button className="action-button save-image-button" onClick={saveImages} style={{ 'margin-right': '5px' }}>Save Images</Button>
+          <Button className="action-button reset-button" onClick={resetPolygon} style={{ 'margin-right': '2px' }}>Reset Polygon</Button>
+          <Button className="action-button load-data-button" onClick={loadImages} style={{ 'margin-right': '2px' }}>Load Data</Button>
+          <Button className="action-button save-image-button" onClick={saveImages} style={{ 'margin-right': '2px' }}>Save Images</Button>
         </div>
       </div>&nbsp;
       <div className="filters-title">Filters</div>
