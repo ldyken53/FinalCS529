@@ -616,7 +616,7 @@ function App() {
           <Button className="action-button save-image-button" onClick={saveImages} style={{ 'margin-right': '5px' }}>Save Images</Button>
         </div>
       </div>&nbsp;
-      <div className="Filter">Filters</div>
+      <div className="filters-title">Filters</div>
       {toggleNeitherPolySliders && (
         <div>
           <div className='sliders-container'>
@@ -679,7 +679,7 @@ function App() {
       {toggleInsidePolySliders && (
         <div>
           <div className='sliders-container'>
-            <div className="slider-section">
+            <div className="slider-section1">
               <div className="slider-label">L5 Threshold (Inside Polygon)</div>
               <div className="slider-container">
                 <Slider
@@ -707,7 +707,7 @@ function App() {
             </div>
           </div>
           <div className='sliders-container'>
-            <div className="slider-section">
+            <div className="slider-section1">
               <div className="slider-label">L5 Opacity in Overlay (Inside Polygon)</div>
               <div className="slider-container">
                 <Slider
@@ -738,7 +738,7 @@ function App() {
       {toggleOutsidePolySliders && (
         <div>
           <div className='sliders-container'>
-            <div className="slider-section">
+            <div className="slider-section1">
               <div className="slider-label">L5 Threshold (Outside Polygon)</div>
               <div className="slider-container">
                 <Slider
@@ -766,7 +766,7 @@ function App() {
             </div>
           </div>
           <div className='sliders-container'>
-            <div className="slider-section">
+            <div className="slider-section1">
               <div className="slider-label">L5 Opacity in Overlay (Outside Polygon)</div>
               <div className="slider-container">
                 <Slider
@@ -852,9 +852,6 @@ function App() {
         <div style={{ 'width': '100%', 'height': 'calc(100% - 9em)' }}>
 
           <div className='gradient-bars-container'>
-            <div className='color-map-title-container'>
-              <div className="color-map-title">{'Color Map for Values'}</div>
-            </div>
             <div className="gradient-bar-section">
               <div className="gradient-bar-container">
                 <h3>L5 Cell Color</h3>
@@ -868,14 +865,15 @@ function App() {
                   topic={"l5"}
                 />
 
-                <img
-                  src="color-picker.png"
-                  alt="Color Picker"
-                  style={{ height: '25px' }}
-                  onClick={toggleColorPickerL5}
-                  id='colorPickerL5'
-                />
-                <label onClick={toggleColorPickerL5} htmlFor='colorPickerL5'>Click to Open/Close</label>
+                <div className="color-picker-container" onClick={toggleColorPickerL5}>
+                  <img
+                    src="color-picker.png"
+                    alt="Color Picker"
+                    style={{ height: '25px' }}
+                    id='colorPickerL5'
+                  />
+                  <label htmlFor='colorPickerL5' className="color-picker-label">Click to Open/Close</label>
+                </div>
 
                 {showColorPickerL5 && (
                   <ColorPicker
@@ -898,14 +896,16 @@ function App() {
                   topic={"l6"}
                 />
 
-                <img
-                  src="color-picker.png"
-                  alt="Color Picker"
-                  style={{ height: '25px' }}
-                  onClick={toggleColorPickerL6}
-                  id='colorPickerL6'
-                />
-                <label onClick={toggleColorPickerL6} htmlFor='colorPickerL6'>Click to Open/Close</label>
+                <div className="color-picker-container" onClick={toggleColorPickerL6}>
+                  <img
+                    src="color-picker.png"
+                    alt="Color Picker"
+                    style={{ height: '25px' }}
+                    id='colorPickerL6'
+                  />
+                  <label htmlFor='colorPickerL6' className="color-picker-label">Click to Open/Close</label>
+                </div>
+
 
                 {showColorPickerL6 && (
                   <ColorPicker
@@ -927,14 +927,16 @@ function App() {
                   topic={"overlay"}
                 />
 
-                <img
-                  src="color-picker.png"
-                  alt="Color Picker"
-                  style={{ height: '25px' }}
-                  onClick={toggleColorPickerOverlay}
-                  id='colorPickerOverlay'
-                />
-                <label onClick={toggleColorPickerOverlay} htmlFor='colorPickerOverlay'>Click to Open/Close</label>
+                <div className="color-picker-container" onClick={toggleColorPickerOverlay}>
+                  <img
+                    src="color-picker.png"
+                    alt="Color Picker"
+                    style={{ height: '25px' }}
+                    onClick={toggleColorPickerOverlay}
+                    id='colorPickerOverlay'
+                  />
+                  <label htmlFor='colorPickerOverlay' className="color-picker-label">Click to Open/Close</label>
+                </div>
 
                 {showColorPickerOverlay && (
                   <ColorPicker
