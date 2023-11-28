@@ -586,7 +586,9 @@ function App() {
       <div className="header-container" >
         <h1>{"Visualization of Cortical Cell Expressiveness"}</h1>
       </div>
-      <div>{"Click and Drag to Pan, Scroll to Zoom, Double Click to Select Polygon Points"}</div>&nbsp;
+      <div className="instructions-text">
+        Click and Drag to Pan, Scroll to Zoom, Double Click to Select Polygon Points
+      </div>
       <div style={{ 'display': 'flex', 'flex-direction': 'row', 'justifyContent': 'space-between' }}>
         <div style={{ 'justifyContent': 'left' }}>
           <ToggleButtonGroup

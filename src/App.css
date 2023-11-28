@@ -191,14 +191,22 @@
 }
 
 .filters-title {
-  font-size: 1.2em;
-  font-weight: 800;
+  font-size: 1.1em;
+  font-weight: 700;
   color: #333;
-  padding: 8px;
+  padding: 6px;
   background-color: #f0f0f0;
   border-radius: 8px 8px 0 0;
   text-align: center;
   margin: 0 auto; 
   width: fit-content;
   margin-top: -10px;
+}
+
+.instructions-text {
+  font-size: 1.2em; /* Increase the font size */
+  font-weight: bold; /* Make the text bold */
+  color: #333; /* Optional: Adjust the color if needed */
+  margin: 10px 0; /* Add some vertical space around the text */
+  text-align: center; /* Center align the text */
 }
